@@ -1,6 +1,4 @@
-The provided change focuses on enhancing the responsiveness of the footer by adjusting grid columns and padding based on screen size.
-```
-```replit_final_file
+
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
