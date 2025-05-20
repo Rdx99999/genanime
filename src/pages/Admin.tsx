@@ -31,7 +31,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { useNavigate } from "react-router-dom";
 
 const Admin = () => {
   const [animes, setAnimes] = useState<Anime[]>([]);
@@ -50,7 +49,6 @@ const Admin = () => {
   const [newReleases, setNewReleases] = useState<Record<string, boolean>>({});
 
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   useEffect(() => {
     loadAnimes();
@@ -265,10 +263,6 @@ const Admin = () => {
     }
   };
 
-  const navigateToEdit = (anime: Anime) => {
-    navigate(`/admin/anime/${anime.id}`);
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <AdminNavbar />
@@ -276,9 +270,25 @@ const Admin = () => {
       <div className="container mx-auto py-6 px-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Anime Management</h1>
-          <Button onClick={() => navigate('/admin/anime/new')}>
-            <Plus className="mr-2 h-4 w-4" /> Add New Anime
-          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" /> Add New Anime
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {selectedAnime ? "Edit Anime" : "Add New Anime"}
+                </DialogTitle>
+              </DialogHeader>
+              <AnimeForm 
+                initialData={selectedAnime || undefined} 
+                onSubmit={selectedAnime ? handleUpdateAnime : handleCreateAnime} 
+                isEditing={!!selectedAnime}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
 
         <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
@@ -371,7 +381,7 @@ const Admin = () => {
                                 <Button 
                                   variant="ghost" 
                                   size="icon"
-                                  onClick={() => navigateToEdit(anime)}
+                                  onClick={() => openEditDialog(anime)}
                                 >
                                   <Edit className="h-4 w-4" />
                                 </Button>
@@ -465,7 +475,7 @@ const Admin = () => {
                                 <Button 
                                   variant="ghost" 
                                   size="icon"
-                                  onClick={() => navigateToEdit(anime)}
+                                  onClick={() => openEditDialog(anime)}
                                 >
                                   <Edit className="h-4 w-4" />
                                 </Button>
@@ -551,7 +561,7 @@ const Admin = () => {
                                 <Button 
                                   variant="ghost" 
                                   size="icon"
-                                  onClick={() => navigateToEdit(anime)}
+                                  onClick={() => openEditDialog(anime)}
                                 >
                                   <Edit className="h-4 w-4" />
                                 </Button>
