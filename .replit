@@ -1,6 +1,10 @@
 modules = ["nodejs-20"]
 
 [[ports]]
+localPort = 5001
+externalPort = 3003
+
+[[ports]]
 localPort = 8080
 externalPort = 80
 
@@ -18,7 +22,6 @@ externalPort = 3001
 
 [[ports]]
 localPort = 8084
-externalPort = 3002
 
 [workflows]
 runButton = "Run Dev Server"
