@@ -20,6 +20,7 @@ import EditAnime from "@/pages/EditAnime";
 import Documentation from "@/pages/Documentation";
 import NotFound from "@/pages/NotFound";
 import AnimeDetails from "@/pages/AnimeDetails";
+import Contact from "@/pages/Contact";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,6 +52,7 @@ const App = () => {
               <Route path="/browse" element={<Browse />} />
               <Route path="/anime/:id" element={<AnimeDetails />} />
               <Route path="/docs" element={<Documentation />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route
                 path="/admin"

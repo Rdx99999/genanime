@@ -34,7 +34,8 @@ function Navbar() {
     { path: "/", label: "Home", icon: <Home className="h-4 w-4" /> },
     { path: "/browse", label: "Browse", icon: <Compass className="h-4 w-4" /> },
     { path: "/popular", label: "Popular", icon: <Star className="h-4 w-4" /> },
-    { path: "/new-releases", label: "New Releases", icon: <Clock className="h-4 w-4" /> }
+    { path: "/new-releases", label: "New Releases", icon: <Clock className="h-4 w-4" /> },
+    { path: "/contact", label: "Contact", icon: <Hash className="h-4 w-4" /> } // Added contact page
   ];
 
   return (
