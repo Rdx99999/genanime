@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Play, Info, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ArrowRight,
+  Play,
+  Info,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 // Sample banner data - you can replace this with actual data from your API
 const bannerData = [
@@ -36,7 +42,7 @@ const bannerData = [
     description:
       "Heroes and villains face off in a battle that will determine society's future.",
     image:
-      "https://images.unsplash.com/photo-1627723362776-e83e9ba5e5b3?ixlib=rb-4.0.3",
+      "https://i.pinimg.com/736x/93/7b/f6/937bf6c10536aeb37843459743c3b9eb.jpg",
     color: "from-green-600/70 to-emerald-600/30",
     rating: "8.7",
     episodes: 25,
@@ -47,8 +53,7 @@ const bannerData = [
     subtitle: "Season 2",
     description:
       "Yuji Itadori and his friends battle against cursed spirits in this thrilling continuation.",
-    image:
-      "https://images.unsplash.com/photo-1575540324562-cc29a6738c43?ixlib=rb-4.0.3",
+    image: "https://wallpapercave.com/wp/wp13617586.jpg",
     color: "from-purple-600/70 to-indigo-600/30",
     rating: "9.5",
     episodes: 23,
@@ -79,7 +84,9 @@ const RotatingBanner = () => {
   // Navigate to previous banner
   const goToPrevious = () => {
     setDirection(-1);
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + bannerData.length) % bannerData.length);
+    setCurrentIndex(
+      (prevIndex) => (prevIndex - 1 + bannerData.length) % bannerData.length,
+    );
   };
 
   // Navigate to next banner
@@ -170,8 +177,8 @@ const RotatingBanner = () => {
                     </div>
                   </div>
                 </motion.div>
-                
-                <motion.h2 
+
+                <motion.h2
                   className="text-4xl md:text-6xl font-bold mb-4 text-white anime-title uppercase tracking-wider"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -179,8 +186,8 @@ const RotatingBanner = () => {
                 >
                   {currentBanner.title}
                 </motion.h2>
-                
-                <motion.p 
+
+                <motion.p
                   className="text-lg md:text-xl text-white/90 mb-6 max-w-xl"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -189,13 +196,16 @@ const RotatingBanner = () => {
                   {currentBanner.description}
                 </motion.p>
 
-                <motion.div 
+                <motion.div
                   className="flex flex-wrap gap-4"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5, duration: 0.5 }}
                 >
-                  <Button size="lg" className="rounded-full gap-2 bg-primary hover:bg-primary/90 hover:scale-105 transition-all">
+                  <Button
+                    size="lg"
+                    className="rounded-full gap-2 bg-primary hover:bg-primary/90 hover:scale-105 transition-all"
+                  >
                     <Play className="h-4 w-4" /> Watch Now
                   </Button>
                   <Button
@@ -214,9 +224,9 @@ const RotatingBanner = () => {
 
       {/* Navigation arrows */}
       <div className="absolute inset-y-0 left-4 flex items-center">
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="rounded-full bg-black/20 hover:bg-black/40 text-white border border-white/10"
           onClick={goToPrevious}
         >
@@ -224,9 +234,9 @@ const RotatingBanner = () => {
         </Button>
       </div>
       <div className="absolute inset-y-0 right-4 flex items-center">
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="rounded-full bg-black/20 hover:bg-black/40 text-white border border-white/10"
           onClick={goToNext}
         >
@@ -242,13 +252,14 @@ const RotatingBanner = () => {
               key={index}
               onClick={() => goToSlide(index)}
               className={`h-full transition-all duration-300 ease-in-out ${
-                index === currentIndex 
+                index === currentIndex
                   ? "bg-primary flex-grow"
                   : "bg-white/30 hover:bg-white/50 flex-grow"
               }`}
-              style={{ 
+              style={{
                 width: `${100 / bannerData.length}%`,
-                transition: index === currentIndex ? "width 5.9s linear" : "none"
+                transition:
+                  index === currentIndex ? "width 5.9s linear" : "none",
               }}
               aria-label={`Go to slide ${index + 1}`}
             />
