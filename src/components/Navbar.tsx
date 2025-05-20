@@ -40,202 +40,92 @@ function Navbar() {
   ];
 
   return (
-    <header 
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        scrolled 
-          ? "bg-card/80 backdrop-blur-lg shadow-lg" 
-          : "bg-gradient-to-b from-background to-transparent"
+    <header
+      className={`sticky top-0 z-50 w-full border-b transition-all duration-200 ${
+        scrolled ? "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80" : "bg-background"
       }`}
     >
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex justify-between items-center">
-          <Link to="/" className="flex items-center space-x-2 group">
-            <motion.img 
-              src="/genAnime-logo.png" 
-              alt="GenAnime Logo" 
-              className="h-9"
-              initial={{ scale: 1 }}
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            />
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-              GenAnime
-            </span>
+      <div className="container mx-auto px-4 py-2 md:py-3">
+        <div className="flex h-14 items-center justify-between">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2">
+            <img src="/genAnime-logo.png" alt="GenAnime" className="h-7 w-auto sm:h-8" />
+            <span className="text-lg md:text-xl font-bold hidden sm:inline-block">GenAnime</span>
           </Link>
 
-          {!isMobile ? (
-            <nav className="flex items-center space-x-1">
-              {menuItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`relative px-3 py-2 text-sm font-medium transition-colors rounded-md hover:bg-primary/10 flex items-center gap-1.5 ${
-                    isActive(item.path) 
-                      ? "text-primary" 
-                      : "text-foreground/80"
-                  }`}
-                >
-                  {item.icon}
-                  {item.label}
-                  {isActive(item.path) && (
-                    <motion.div
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
-                      layoutId="navbar-indicator"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    />
-                  )}
-                </Link>
-              ))}
-            </nav>
-          ) : (
-            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Toggle menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] p-0 bg-card/95 backdrop-blur-xl border-l border-primary/10">
-                <div className="flex flex-col h-full">
-                  <div className="flex justify-between items-center p-4 border-b border-border/40">
-                    <Link to="/" className="flex items-center space-x-2" onClick={() => setIsMenuOpen(false)}>
-                      <img src="/genAnime-logo.png" alt="GenAnime Logo" className="h-8" />
-                      <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-                        GenAnime
-                      </span>
-                    </Link>
-                    <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(false)} className="hover:bg-primary/10">
-                      <X className="h-5 w-5" />
-                      <span className="sr-only">Close menu</span>
-                    </Button>
-                  </div>
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-4 lg:space-x-6">
+            {menuItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-1.5 ${
+                  isActive(item.path) ? "text-primary" : "text-foreground/80"
+                }`}
+              >
+                {item.icon}
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
-                  <div className="p-4">
-                    <form
-                      className="relative"
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        const searchInput = e.currentTarget.querySelector('input');
-                        if (searchInput && searchInput.value.trim()) {
-                          navigate(`/browse?search=${encodeURIComponent(searchInput.value.trim())}`);
-                          setIsMenuOpen(false);
-                        }
-                      }}
-                    >
-                      <input
-                        type="text"
-                        placeholder="Search anime..."
-                        className="w-full bg-muted border-0 rounded-full py-2 pl-10 pr-9 text-sm"
-                      />
-                      <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <button type="submit" className="absolute right-3 top-2 text-primary" aria-label="Search">
-                        <ArrowRight className="h-4 w-4" />
-                      </button>
-                    </form>
-                  </div>
-
-                  <nav className="flex flex-col p-4 pt-2 space-y-1">
-                    {menuItems.map((item) => (
-                      <Link
-                        key={item.path}
-                        to={item.path}
-                        className={`flex items-center gap-3 text-sm font-medium transition-colors px-3 py-2.5 rounded-lg ${
-                          isActive(item.path) 
-                            ? "text-primary bg-primary/10" 
-                            : "text-foreground/80 hover:bg-muted"
-                        }`}
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {item.icon}
-                        {item.label}
-                      </Link>
-                    ))}
-                  </nav>
-
-                  <div className="border-t border-border/40 mt-4 p-4">
-                    <div className="space-y-3">
-                      <div className="text-xs font-medium text-muted-foreground mb-2 px-3">ACCOUNT</div>
-                      <a href="#" className="flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg hover:bg-muted">
-                        <User className="h-4 w-4" />
-                        Profile
-                      </a>
-                      <a href="#" className="flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg hover:bg-muted">
-                        <Bell className="h-4 w-4" />
-                        Notifications
-                      </a>
-                      <div className="flex items-center justify-between gap-3 text-sm font-medium px-3 py-2.5 rounded-lg hover:bg-muted cursor-pointer">
-                        <div className="flex items-center gap-3">
-                          <Star className="h-4 w-4" />
-                          Favorites
-                        </div>
-                        <ChevronDown className="h-4 w-4" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Login buttons removed */}
-                </div>
-              </SheetContent>
-            </Sheet>
-          )}
-
-          {!isMobile && (
-            <div className="flex items-center space-x-2">
-              <AnimatePresence>
-                {searchActive ? (
-                  <motion.form 
-                    initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: "200px", opacity: 1 }}
-                    exit={{ width: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="relative"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      const searchInput = e.currentTarget.querySelector('input');
-                      if (searchInput && searchInput.value.trim()) {
-                        navigate(`/browse?search=${encodeURIComponent(searchInput.value.trim())}`);
-                        setSearchActive(false);
-                      }
-                    }}
-                  >
-                    <input
-                      type="text"
-                      placeholder="Search anime..."
-                      className="w-full h-9 bg-muted border-0 rounded-full py-2 pl-9 pr-3 text-sm"
-                      autoFocus
-                      onBlur={(e) => {
-                        // Don't hide when clicking the submit button
-                        if (!e.relatedTarget || !e.relatedTarget.classList.contains('search-submit')) {
-                          setSearchActive(false);
-                        }
-                      }}
-                    />
-                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <button type="submit" className="search-submit absolute right-2 top-1.5 text-primary hover:text-primary/80" aria-label="Search">
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
-                  </motion.form>
-                ) : (
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => setSearchActive(true)}
-                    className="hover:bg-primary/10 w-9 h-9"
-                  >
-                    <Search className="h-4 w-4" />
-                    <span className="sr-only">Search</span>
-                  </Button>
-                )}
-              </AnimatePresence>
-
-              <Button variant="ghost" size="icon" className="hover:bg-primary/10 w-9 h-9">
-                <Bell className="h-4 w-4" />
-                <span className="sr-only">Notifications</span>
+          {/* Mobile Navigation */}
+          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Open menu</span>
               </Button>
-            </div>
-          )}
+            </SheetTrigger>
+            <SheetContent side="left" className="w-full sm:w-80 bg-background">
+              <div className="flex flex-col h-full">
+                <div className="px-6 py-5 flex items-center justify-between">
+                  <Link to="/" className="flex items-center space-x-2">
+                    <img src="/genAnime-logo.png" alt="GenAnime" className="h-7 w-auto" />
+                    <span className="text-lg font-bold">GenAnime</span>
+                  </Link>
+                  <Button variant="ghost" size="sm" className="hover:bg-accent" onClick={() => setIsMenuOpen(false)}>
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Close menu</span>
+                  </Button>
+                </div>
+                <nav className="flex flex-col space-y-1 px-2">
+                  {menuItems.map((item) => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`flex items-center space-x-3 py-2 px-4 rounded-md hover:bg-accent transition-colors ${
+                        isActive(item.path) ? "text-primary" : ""
+                      }`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </Link>
+                  ))}
+                </nav>
+                <div className="mt-auto px-6 py-4">
+                  <Button variant="outline" className="w-full justify-center">
+                    Login
+                  </Button>
+                  <Button className="w-full justify-center">Sign Up</Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* Actions */}
+          <div className="hidden md:flex items-center space-x-4">
+            <Button variant="ghost" size="sm" className="hover:bg-accent">
+              <Search className="h-5 w-5" />
+              <span className="sr-only">Search</span>
+            </Button>
+            <Button variant="ghost" size="sm" className="relative hover:bg-accent">
+              <Bell className="h-5 w-5" />
+              <span className="sr-only">Notifications</span>
+              <div className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full border border-background"></div>
+            </Button>
+          </div>
         </div>
       </div>
     </header>

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -71,7 +70,7 @@ const AnimeDetails = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
-      
+
       {/* Hero banner with blurred background */}
       <div className="relative w-full h-[300px] overflow-hidden">
         <div className="absolute inset-0 bg-black/60 z-10"></div>
@@ -101,9 +100,11 @@ const AnimeDetails = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-8">
-          <div className="space-y-6">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          {/* Left column - Anime information */}
+          <div className="md:col-span-2 space-y-6">
+
             {/* Anime poster with shadow effect */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
@@ -188,7 +189,7 @@ const AnimeDetails = () => {
                 <div className="h-8 w-1 bg-gradient-to-b from-primary to-primary/30 rounded-full mr-3"></div>
                 <h2 className="text-xl font-semibold">Download Episodes</h2>
               </div>
-              
+
               <div className="bg-secondary/10 p-6 rounded-lg border border-primary/10 shadow-lg">
                 {anime.downloadLinks && anime.downloadLinks.length > 0 ? (
                   <EpisodeDownloadList downloadLinks={anime.downloadLinks} />

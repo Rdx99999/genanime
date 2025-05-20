@@ -15,7 +15,7 @@ const AnimeCard = ({ anime, onClick }: AnimeCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-  
+
   const handleClick = (e: React.MouseEvent) => {
     if (onClick) {
       onClick(e);
@@ -67,6 +67,22 @@ const AnimeCard = ({ anime, onClick }: AnimeCardProps) => {
                 </button>
               </motion.div>
             </motion.div>
+              <div className="absolute top-2 right-2 flex items-center px-1.5 py-0.5 sm:px-2 sm:py-1 bg-background/90 text-primary font-semibold rounded-lg text-[10px] sm:text-xs">
+                <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1 fill-primary stroke-0" />
+                {anime.rating || "N/A"}
+              </div>
+              <div className="absolute left-0 top-0 p-1.5 sm:p-2 flex flex-col gap-1">
+                {anime.isPopular && (
+                  <span className="bg-primary text-white text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 rounded-md">
+                    Popular
+                  </span>
+                )}
+                {anime.isNewRelease && (
+                  <span className="bg-accent text-white text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 rounded-md">
+                    New
+                  </span>
+                )}
+              </div>
           </div>
 
           <CardContent className="p-4 pt-3 relative flex-grow flex flex-col">
