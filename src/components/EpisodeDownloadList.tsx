@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { motion } from "framer-motion";
 
 interface EpisodeDownloadListProps {
   downloadLinks: DownloadLink[];
@@ -15,12 +16,17 @@ const EpisodeDownloadList = ({ downloadLinks }: EpisodeDownloadListProps) => {
   const [itemsPerPage, setItemsPerPage] = useState("10");
   const [selectedEpisode, setSelectedEpisode] = useState<number | null>(null);
   const [searchEpisode, setSearchEpisode] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
-    // Add a timeout to detect if loading hangs
+    // Set loading to false after component mounts
     const timer = setTimeout(() => {
+      setLoading(false);
+    }, 500); // Short timeout to show loading indicator briefly
+    
+    // Add a timeout to detect if loading hangs
+    const errorTimer = setTimeout(() => {
       if (loading) {
         setLoading(false);
         setLoadError(true);
@@ -28,7 +34,10 @@ const EpisodeDownloadList = ({ downloadLinks }: EpisodeDownloadListProps) => {
       }
     }, 10000); // 10 seconds timeout
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(errorTimer);
+    };
   }, [loading]);
 
   // Group links by episode number
