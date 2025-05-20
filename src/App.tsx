@@ -21,6 +21,9 @@ import Documentation from "@/pages/Documentation";
 import NotFound from "@/pages/NotFound";
 import AnimeDetails from "@/pages/AnimeDetails";
 import Contact from "@/pages/Contact";
+import TermsOfService from "@/pages/TermsOfService";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import DMCA from "@/pages/DMCA";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,6 +56,9 @@ const App = () => {
               <Route path="/anime/:id" element={<AnimeDetails />} />
               <Route path="/docs" element={<Documentation />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/dmca" element={<DMCA />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route
                 path="/admin"

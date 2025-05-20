@@ -64,7 +64,7 @@ function Footer() {
                   Contact
                 </Link>
               </li>
-              
+
             </ul>
           </motion.div>
 
@@ -89,10 +89,10 @@ function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 text-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21 8-2 2-3-3 2-2a1.414 1.414 0 0 1 2 0l1 1a1.414 1.414 0 0 1 0 2Z"></path><path d="M3 21 8 16M6 18l3-3M11 13 16 8M3 8h4v4"></path><path d="m14 6 1-1 3 3-1 1"></path></svg>
-                  DMCA
-                </a>
+                <Link to="/dmca" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 text-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m10 13-5 4 1-7-5-4h7l2-6 2 6h7l-5 4 1 7-5-4z"/></svg>
+                  DMCA Policy
+                </Link>
               </li>
               <li>
                 <Link to="/contact" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 text-sm">
