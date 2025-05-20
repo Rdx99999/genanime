@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Anime } from "@/types/anime";
 import { Star, Calendar, Play } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
 
 interface AnimeCardProps {
   anime: Anime;
@@ -13,9 +14,18 @@ interface AnimeCardProps {
 const AnimeCard = ({ anime, onClick }: AnimeCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  
+  const handleClick = (e: React.MouseEvent) => {
+    if (onClick) {
+      onClick(e);
+    } else {
+      navigate(`/anime/${anime.id}`);
+    }
+  };
 
   return (
-    <div onClick={onClick} className="h-full overflow-visible">
+    <div onClick={handleClick} className="h-full overflow-visible cursor-pointer">
       <motion.div
         whileHover={{ 
           y: -10,

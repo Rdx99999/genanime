@@ -4,7 +4,7 @@ import { Anime } from "@/types/anime";
 import Navbar from "@/components/Navbar";
 import AnimeCard from "@/components/AnimeCard";
 import EpisodeDownloadList from "@/components/EpisodeDownloadList";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Download, Filter, Loader2 } from "lucide-react";
@@ -14,8 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const Browse = () => {
   const [animes, setAnimes] = useState<Anime[]>([]);
   const [filteredAnimes, setFilteredAnimes] = useState<Anime[]>([]);
-  const [selectedAnime, setSelectedAnime] = useState<Anime | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -114,8 +113,7 @@ const Browse = () => {
   };
 
   const openAnimeDetails = (anime: Anime) => {
-    setSelectedAnime(anime);
-    setIsDialogOpen(true);
+    navigate(`/anime/${anime.id}`);
   };
 
   return (
@@ -227,69 +225,7 @@ const Browse = () => {
         )}
       </div>
 
-      <Dialog open={!!selectedAnime} onOpenChange={(open) => !open && setSelectedAnime(null)}>
-        {selectedAnime && (
-          <DialogContent className="max-w-4xl w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] h-[calc(100vh-2rem)] sm:h-[calc(100vh-4rem)] max-h-[800px] overflow-hidden flex flex-col p-3 sm:p-6">
-            <DialogHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-2 space-y-2 sm:space-y-0">
-              <DialogTitle className="text-lg sm:text-xl md:text-2xl line-clamp-2">{selectedAnime.title}</DialogTitle>
-              <div className="flex flex-wrap gap-1">
-                {selectedAnime.genres?.map((genre) => (
-                  <Badge key={genre} variant="secondary" className="text-[10px] sm:text-xs">
-                    {genre}
-                  </Badge>
-                ))}
-              </div>
-            </DialogHeader>
-            <div className="flex-1 overflow-y-auto -mr-3 pr-3 sm:-mr-6 sm:pr-6">
-              <div className="grid grid-cols-1 md:grid-cols-[minmax(120px,300px)_1fr] gap-3 sm:gap-4 md:gap-6">
-                <div className="relative aspect-[2/3] w-full max-w-[180px] sm:max-w-[300px] mx-auto md:mx-0 bg-muted rounded-lg overflow-hidden">
-                  <img 
-                    src={selectedAnime.imageUrl} 
-                    alt={selectedAnime.title}
-                    className="object-cover w-full h-full"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="space-y-3 sm:space-y-4">
-                  <div>
-                    <h4 className="font-medium text-sm md:text-base mb-1 md:mb-2">Description</h4>
-                    <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
-                      {selectedAnime.description}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-3 sm:gap-4">
-                    {selectedAnime.releaseYear && (
-                      <div>
-                        <h4 className="font-medium text-xs sm:text-sm md:text-base mb-1">Year</h4>
-                        <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
-                          {selectedAnime.releaseYear}
-                        </p>
-                      </div>
-                    )}
-                    {selectedAnime.episodes && (
-                      <div>
-                        <h4 className="font-medium text-xs sm:text-sm md:text-base mb-1">Episodes</h4>
-                        <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
-                          {selectedAnime.episodes}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium text-sm md:text-base mb-1 md:mb-2">Available Downloads</h4>
-                    {selectedAnime.downloadLinks.length > 0 ? (
-                      <EpisodeDownloadList downloadLinks={selectedAnime.downloadLinks} />
-                    ) : (
-                      <p className="text-muted-foreground text-xs md:text-sm">No download links available</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        )}
-      </Dialog>
+      {/* Anime details moved to dedicated page */}
 
       <footer className="bg-secondary/30 py-8">
         <div className="container mx-auto px-4 text-center">

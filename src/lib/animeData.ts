@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { supabase } from "@/integrations/supabase/client";
 import { Anime, DownloadLink } from "@/types/anime";
@@ -57,7 +56,6 @@ export async function getAllAnimes(): Promise<Anime[]> {
   }
 }
 
-// Get anime by ID
 export const getAnimeById = async (id: string): Promise<Anime | null> => {
   try {
     const { data: anime, error } = await supabase

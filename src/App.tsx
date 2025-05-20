@@ -17,6 +17,7 @@ import Admin from "@/pages/Admin";
 import AdminLogin from "@/pages/AdminLogin";
 import Documentation from "@/pages/Documentation";
 import NotFound from "@/pages/NotFound";
+import AnimeDetails from "@/pages/AnimeDetails";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,6 +47,7 @@ const App = () => {
               <Route path="/popular" element={<Popular />} />
               <Route path="/new-releases" element={<NewReleases />} />
               <Route path="/browse" element={<Browse />} />
+              <Route path="/anime/:id" element={<AnimeDetails />} />
               <Route path="/docs" element={<Documentation />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route
