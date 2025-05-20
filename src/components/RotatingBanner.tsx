@@ -121,7 +121,7 @@ const RotatingBanner = () => {
 
   return (
     <div
-      className="relative w-full h-[50vh] sm:h-[60vh] md:h-[70vh] overflow-hidden"
+      className="relative w-full h-[70vh] overflow-hidden"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -179,7 +179,7 @@ const RotatingBanner = () => {
                 </motion.div>
 
                 <motion.h2
-                  className="text-2xl sm:text-4xl md:text-6xl font-bold mb-2 md:mb-4 text-white anime-title uppercase tracking-wider"
+                  className="text-4xl md:text-6xl font-bold mb-4 text-white anime-title uppercase tracking-wider"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.5 }}
@@ -188,7 +188,7 @@ const RotatingBanner = () => {
                 </motion.h2>
 
                 <motion.p
-                  className="text-sm sm:text-lg md:text-xl text-white/90 mb-3 md:mb-6 max-w-xl line-clamp-2 sm:line-clamp-none"
+                  className="text-lg md:text-xl text-white/90 mb-6 max-w-xl"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4, duration: 0.5 }}
