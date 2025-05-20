@@ -137,37 +137,57 @@ const EpisodeDownloadList = ({ downloadLinks }: EpisodeDownloadListProps) => {
           filteredEpisodes.length > 0 ? (
             paginatedEpisodes.map(([episodeNumber, links]) => (
               <div key={episodeNumber} className="space-y-1">
-                <div 
-                  className="flex items-center justify-between bg-secondary/50 p-1.5 md:p-2 rounded-md cursor-pointer active:bg-secondary/70 touch-manipulation"
+                <motion.div 
+                  initial={{ opacity: 0.8 }}
+                  whileHover={{ opacity: 1 }}
+                  className="flex items-center justify-between bg-gradient-to-r from-secondary/50 to-secondary/30 p-2 md:p-3 rounded-lg cursor-pointer active:bg-secondary/70 touch-manipulation border border-primary/10 hover:border-primary/30 transition-all"
                   onClick={() => toggleEpisode(episodeNumber)}
                 >
-                  <div className="flex-1 min-w-0">
-                    <span className="text-xs md:text-sm font-medium">Episode {episodeNumber}</span>
-                    <span className="text-xs text-muted-foreground ml-1 md:ml-2">({links.length} qualities)</span>
+                  <div className="flex-1 min-w-0 flex items-center">
+                    <span className="inline-flex items-center justify-center rounded-full bg-primary/20 text-primary h-6 w-6 mr-2 text-[10px] font-bold">{episodeNumber}</span>
+                    <div>
+                      <span className="text-xs md:text-sm font-medium">Episode {episodeNumber}</span>
+                      <span className="text-xs text-muted-foreground ml-1 md:ml-2">({links.length} qualities)</span>
+                    </div>
                   </div>
-                  <Button size="sm" variant="ghost" className="ml-1 md:ml-2 p-1">
-                    <ChevronRight className={`h-3 w-3 md:h-4 md:w-4 transition-transform ${selectedEpisode === episodeNumber ? 'rotate-90' : ''}`} />
+                  <Button size="sm" variant="ghost" className="ml-1 md:ml-2 p-1 hover:bg-primary/10">
+                    <ChevronRight className={`h-4 w-4 transition-transform duration-300 ${selectedEpisode === episodeNumber ? 'rotate-90 text-primary' : ''}`} />
                   </Button>
-                </div>
+                </motion.div>
 
                 {/* Quality options */}
                 {selectedEpisode === episodeNumber && (
-                  <div className="pl-2 sm:pl-4 space-y-1 mt-1">
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="pl-3 sm:pl-6 space-y-2 mt-2 overflow-hidden"
+                  >
                     {links.map((link) => (
-                      <div key={link.id} className="flex items-center justify-between bg-background p-1.5 md:p-2 rounded-md border">
+                      <motion.div 
+                        key={link.id} 
+                        initial={{ x: -5, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex items-center justify-between bg-background/60 backdrop-blur-sm p-2 md:p-3 rounded-lg border border-primary/10 hover:border-primary/30 transition-all"
+                      >
                         <div className="flex-1 min-w-0">
-                          <span className="text-xs text-muted-foreground">Quality: </span>
-                          <span className="text-xs md:text-sm font-medium">{link.quality}</span>
+                          <div className="flex items-center">
+                            <div className="h-2 w-2 rounded-full bg-primary mr-2"></div>
+                            <span className="text-xs text-muted-foreground">Quality: </span>
+                            <span className="text-xs md:text-sm font-medium ml-1">{link.quality}</span>
+                          </div>
                         </div>
-                        <Button size="sm" variant="ghost" className="ml-1 md:ml-2 p-1 md:px-2" asChild>
-                          <a href={link.url} target="_blank" rel="noreferrer">
-                            <Download className="h-3 w-3 md:h-4 md:w-4" />
-                            <span className="sr-only sm:not-sr-only sm:inline ml-1">Download</span>
+                        <Button size="sm" variant="outline" className="ml-1 md:ml-2 p-1 md:px-3 border-primary/20 hover:bg-primary hover:text-white transition-colors" asChild>
+                          <a href={link.url} target="_blank" rel="noreferrer" className="flex items-center">
+                            <Download className="h-3 w-3 md:h-4 md:w-4 mr-0 md:mr-1" />
+                            <span className="sr-only sm:not-sr-only sm:inline">Download</span>
                           </a>
                         </Button>
-                      </div>
+                      </motion.div>
                     ))}
-                  </div>
+                  </motion.div>
                 )}
               </div>
             ))
