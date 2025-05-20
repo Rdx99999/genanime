@@ -15,6 +15,8 @@ import NewReleases from "@/pages/NewReleases";
 import Browse from "@/pages/Browse";
 import Admin from "@/pages/Admin";
 import AdminLogin from "@/pages/AdminLogin";
+import CreateAnime from "@/pages/CreateAnime";
+import EditAnime from "@/pages/EditAnime";
 import Documentation from "@/pages/Documentation";
 import NotFound from "@/pages/NotFound";
 import AnimeDetails from "@/pages/AnimeDetails";
@@ -58,6 +60,8 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
+          <Route path="/admin/create" element={<ProtectedRoute><CreateAnime /></ProtectedRoute>} />
+          <Route path="/admin/edit/:id" element={<ProtectedRoute><EditAnime /></ProtectedRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

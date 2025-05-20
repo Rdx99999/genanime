@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,6 +34,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
 const Admin = () => {
+  const navigate = useNavigate();
   const [animes, setAnimes] = useState<Anime[]>([]);
   const [filteredAnimes, setFilteredAnimes] = useState<Anime[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -115,48 +117,9 @@ const Admin = () => {
     }
   };
 
-  const handleCreateAnime = async (animeData: Omit<Anime, "id">) => {
-    try {
-      await createAnime(animeData);
-      await loadAnimes();
-      setIsDialogOpen(false);
-      toast({
-        title: "Success",
-        description: "Anime created successfully",
-        variant: "default"
-      });
-    } catch (error) {
-      console.error("Error creating anime:", error);
-      toast({
-        title: "Error",
-        description: "Failed to create anime",
-        variant: "destructive"
-      });
-    }
-  };
+  // handleCreateAnime removed - now handled in CreateAnime page
 
-  const handleUpdateAnime = async (animeData: Omit<Anime, "id">) => {
-    if (!selectedAnime) return;
-
-    try {
-      await updateAnime(selectedAnime.id, animeData);
-      await loadAnimes();
-      setIsDialogOpen(false);
-      setSelectedAnime(null);
-      toast({
-        title: "Success",
-        description: "Anime updated successfully",
-        variant: "default"
-      });
-    } catch (error) {
-      console.error("Error updating anime:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update anime",
-        variant: "destructive"
-      });
-    }
-  };
+  // handleUpdateAnime removed - now handled in EditAnime page
 
   const handleDeleteAnime = async () => {
     if (!selectedAnime) return;
@@ -182,8 +145,7 @@ const Admin = () => {
   };
 
   const openEditDialog = (anime: Anime) => {
-    setSelectedAnime(anime);
-    setIsDialogOpen(true);
+    navigate(`/admin/edit/${anime.id}`);
   };
 
   const openDeleteDialog = (anime: Anime) => {
@@ -270,25 +232,9 @@ const Admin = () => {
       <div className="container mx-auto py-6 px-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Anime Management</h1>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" /> Add New Anime
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {selectedAnime ? "Edit Anime" : "Add New Anime"}
-                </DialogTitle>
-              </DialogHeader>
-              <AnimeForm 
-                initialData={selectedAnime || undefined} 
-                onSubmit={selectedAnime ? handleUpdateAnime : handleCreateAnime} 
-                isEditing={!!selectedAnime}
-              />
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => navigate("/admin/create")}>
+            <Plus className="mr-2 h-4 w-4" /> Add New Anime
+          </Button>
         </div>
 
         <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
