@@ -77,16 +77,16 @@ function Footer() {
             <h3 className="text-lg font-semibold mb-4 border-b border-border pb-2">Legal</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 text-sm">
+                <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 text-sm">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
                   Terms of Service
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 text-sm">
+                <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 text-sm">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 22V12h6v10"></path><path d="M3 10V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4"></path><path d="M1 10h22"></path></svg>
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
                 <Link to="/dmca" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 text-sm">
