@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
-import { Menu, X, Search, User, Bell, ChevronDown, Star, Home, Compass, Clock, Hash } from "lucide-react";
+import { Menu, X, Search, User, Bell, ChevronDown, Star, Home, Compass, Clock, Hash, ArrowRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 function Navbar() {
@@ -12,6 +12,7 @@ function Navbar() {
   const [searchActive, setSearchActive] = useState(false);
   const location = useLocation();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -112,14 +113,27 @@ function Navbar() {
                   </div>
 
                   <div className="p-4">
-                    <div className="relative">
+                    <form
+                      className="relative"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const searchInput = e.currentTarget.querySelector('input');
+                        if (searchInput && searchInput.value.trim()) {
+                          navigate(`/browse?search=${encodeURIComponent(searchInput.value.trim())}`);
+                          setIsMenuOpen(false);
+                        }
+                      }}
+                    >
                       <input
                         type="text"
                         placeholder="Search anime..."
-                        className="w-full bg-muted border-0 rounded-full py-2 pl-10 pr-4 text-sm"
+                        className="w-full bg-muted border-0 rounded-full py-2 pl-10 pr-9 text-sm"
                       />
                       <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    </div>
+                      <button type="submit" className="absolute right-3 top-2 text-primary" aria-label="Search">
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                    </form>
                   </div>
 
                   <nav className="flex flex-col p-4 pt-2 space-y-1">
@@ -171,22 +185,38 @@ function Navbar() {
             <div className="flex items-center space-x-2">
               <AnimatePresence>
                 {searchActive ? (
-                  <motion.div 
+                  <motion.form 
                     initial={{ width: 0, opacity: 0 }}
                     animate={{ width: "200px", opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
                     transition={{ duration: 0.2 }}
                     className="relative"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const searchInput = e.currentTarget.querySelector('input');
+                      if (searchInput && searchInput.value.trim()) {
+                        navigate(`/browse?search=${encodeURIComponent(searchInput.value.trim())}`);
+                        setSearchActive(false);
+                      }
+                    }}
                   >
                     <input
                       type="text"
                       placeholder="Search anime..."
                       className="w-full h-9 bg-muted border-0 rounded-full py-2 pl-9 pr-3 text-sm"
                       autoFocus
-                      onBlur={() => setSearchActive(false)}
+                      onBlur={(e) => {
+                        // Don't hide when clicking the submit button
+                        if (!e.relatedTarget || !e.relatedTarget.classList.contains('search-submit')) {
+                          setSearchActive(false);
+                        }
+                      }}
                     />
                     <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                  </motion.div>
+                    <button type="submit" className="search-submit absolute right-2 top-1.5 text-primary hover:text-primary/80" aria-label="Search">
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  </motion.form>
                 ) : (
                   <Button 
                     variant="ghost" 
