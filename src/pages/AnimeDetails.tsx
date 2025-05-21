@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -71,7 +70,7 @@ const AnimeDetails = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
-      
+
       {/* Hero banner with blurred background */}
       <div className="relative w-full h-[300px] overflow-hidden">
         <div className="absolute inset-0 bg-black/60 z-10"></div>
@@ -188,10 +187,13 @@ const AnimeDetails = () => {
                 <div className="h-8 w-1 bg-gradient-to-b from-primary to-primary/30 rounded-full mr-3"></div>
                 <h2 className="text-xl font-semibold">Download Episodes</h2>
               </div>
-              
+
               <div className="bg-secondary/10 p-6 rounded-lg border border-primary/10 shadow-lg">
                 {anime.downloadLinks && anime.downloadLinks.length > 0 ? (
-                  <EpisodeDownloadList downloadLinks={anime.downloadLinks} />
+                  <>
+                    <h4 className="font-medium text-xl mb-4">Episodes</h4>
+                    <EpisodeDownloadList downloadLinks={anime.downloadLinks} animeId={id} />
+                  </>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <Download className="h-12 w-12 text-muted-foreground mb-4 opacity-50" />
