@@ -24,7 +24,6 @@ import Contact from "@/pages/Contact";
 import TermsOfService from "@/pages/TermsOfService";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import DMCA from "@/pages/DMCA";
-import VideoPlayer from "./pages/VideoPlayer";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,7 +70,6 @@ const App = () => {
               />
           <Route path="/admin/create" element={<ProtectedRoute><CreateAnime /></ProtectedRoute>} />
           <Route path="/admin/edit/:id" element={<ProtectedRoute><EditAnime /></ProtectedRoute>} />
-          <Route path="watch/:animeId" element={<VideoPlayer />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

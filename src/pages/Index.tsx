@@ -204,10 +204,7 @@ const Index = () => {
                   <div>
                     <h4 className="font-medium text-sm md:text-base mb-1 md:mb-2">Available Downloads</h4>
                     {selectedAnime.downloadLinks.length > 0 ? (
-                      <EpisodeDownloadList 
-                        downloadLinks={selectedAnime.downloadLinks} 
-                        animeId={selectedAnime.id}
-                      />
+                      <EpisodeDownloadList downloadLinks={selectedAnime.downloadLinks} />
                     ) : (
                       <p className="text-muted-foreground text-xs md:text-sm">No download links available</p>
                     )}
