@@ -20,6 +20,7 @@ import EditAnime from "@/pages/EditAnime";
 import Documentation from "@/pages/Documentation";
 import NotFound from "@/pages/NotFound";
 import AnimeDetails from "@/pages/AnimeDetails";
+import VideoPlayer from "@/pages/VideoPlayer";
 import Contact from "@/pages/Contact";
 import TermsOfService from "@/pages/TermsOfService";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
@@ -54,6 +55,7 @@ const App = () => {
               <Route path="/new-releases" element={<NewReleases />} />
               <Route path="/browse" element={<Browse />} />
               <Route path="/anime/:id" element={<AnimeDetails />} />
+              <Route path="/watch/:id" element={<VideoPlayer />} />
               <Route path="/docs" element={<Documentation />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/terms" element={<TermsOfService />} />
