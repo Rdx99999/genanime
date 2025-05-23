@@ -153,55 +153,163 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
       
       <style>{`
         .plyr-video-container {
-          --plyr-color-main: #3b82f6;
+          --plyr-color-main: hsl(var(--primary));
           --plyr-font-family: inherit;
           --plyr-font-size-base: 14px;
-          --plyr-border-radius: 8px;
+          --plyr-border-radius: 12px;
+          --plyr-control-icon-size: 18px;
+          --plyr-control-spacing: 10px;
+          --plyr-control-padding: 12px;
+          --plyr-menu-background: hsl(var(--background));
+          --plyr-menu-border-color: hsl(var(--border));
+          --plyr-tooltip-background: hsl(var(--popover));
+          --plyr-tooltip-color: hsl(var(--popover-foreground));
+        }
+        
+        .plyr {
+          border-radius: 12px;
+          overflow: hidden;
         }
         
         .plyr--full-ui input[type=range] {
-          color: #3b82f6;
+          color: hsl(var(--primary));
         }
         
         .plyr__control--overlaid {
-          background: rgba(59, 130, 246, 0.9);
+          background: hsl(var(--primary) / 0.9);
+          border: 2px solid hsl(var(--primary));
+          color: hsl(var(--primary-foreground));
+          border-radius: 50%;
+          transition: all 0.3s ease;
+          backdrop-filter: blur(8px);
         }
         
         .plyr__control--overlaid:hover {
-          background: rgba(59, 130, 246, 1);
-        }
-        
-        .plyr__menu__container {
-          background: rgba(0, 0, 0, 0.9);
-          border-radius: 8px;
+          background: hsl(var(--primary));
+          transform: scale(1.05);
+          box-shadow: 0 8px 25px hsl(var(--primary) / 0.3);
         }
         
         .plyr__controls {
-          background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+          background: linear-gradient(
+            transparent 0%,
+            rgba(0, 0, 0, 0.1) 50%,
+            rgba(0, 0, 0, 0.8) 100%
+          );
           padding: 20px;
+          border-radius: 0 0 12px 12px;
+        }
+        
+        .plyr__control {
+          color: white;
+          transition: all 0.2s ease;
+        }
+        
+        .plyr__control:hover {
+          color: hsl(var(--primary));
+          transform: scale(1.1);
+        }
+        
+        .plyr__control.plyr__tab-focus {
+          box-shadow: 0 0 0 2px hsl(var(--primary));
+        }
+        
+        .plyr__menu__container {
+          background: hsl(var(--background) / 0.95);
+          border: 1px solid hsl(var(--border));
+          border-radius: 12px;
+          backdrop-filter: blur(12px);
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .plyr__menu__container .plyr__control {
+          color: hsl(var(--foreground));
+        }
+        
+        .plyr__menu__container .plyr__control:hover {
+          background: hsl(var(--accent));
+          color: hsl(var(--accent-foreground));
         }
         
         .plyr__progress input[type=range] {
-          color: #3b82f6;
+          color: hsl(var(--primary));
+        }
+        
+        .plyr__progress input[type=range]::-webkit-slider-thumb {
+          background: hsl(var(--primary));
+          border: 2px solid white;
+          box-shadow: 0 4px 12px hsl(var(--primary) / 0.4);
         }
         
         .plyr__volume input[type=range] {
-          color: #3b82f6;
+          color: hsl(var(--primary));
         }
         
+        .plyr__tooltip {
+          background: hsl(var(--popover));
+          color: hsl(var(--popover-foreground));
+          border: 1px solid hsl(var(--border));
+          border-radius: 8px;
+          font-size: 12px;
+          padding: 4px 8px;
+        }
+        
+        .plyr__time {
+          color: white;
+          font-weight: 500;
+        }
+        
+        /* Dark theme specific adjustments */
+        @media (prefers-color-scheme: dark) {
+          .plyr__controls {
+            background: linear-gradient(
+              transparent 0%,
+              rgba(0, 0, 0, 0.2) 50%,
+              rgba(0, 0, 0, 0.9) 100%
+            );
+          }
+        }
+        
+        /* Mobile responsive design */
         @media (max-width: 768px) {
           .plyr__controls {
-            padding: 15px;
+            padding: 16px;
           }
           
           .plyr__control {
-            padding: 10px;
+            padding: 12px;
+            min-width: 44px;
+            min-height: 44px;
           }
           
           .plyr__control--overlaid {
-            width: 60px;
-            height: 60px;
+            width: 64px;
+            height: 64px;
           }
+          
+          .plyr__tooltip {
+            font-size: 11px;
+          }
+        }
+        
+        /* Custom loading animation */
+        .plyr__poster {
+          background-size: cover;
+          background-position: center;
+          border-radius: 12px;
+        }
+        
+        /* Volume slider styling */
+        .plyr__volume input[type=range]::-webkit-slider-track {
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 4px;
+        }
+        
+        .plyr__volume input[type=range]::-webkit-slider-thumb {
+          background: hsl(var(--primary));
+          border: 2px solid white;
+          border-radius: 50%;
+          box-shadow: 0 2px 8px hsl(var(--primary) / 0.3);
         }
       `}</style>
     </div>
