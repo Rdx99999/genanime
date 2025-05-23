@@ -169,41 +169,41 @@ const VideoPlayer = () => {
         let totalNetworkData = 0;
         
         // Get authentic video stats from HTML5 Video API
-        if (videoElement) {
+        if (videoEl) {
           // Real video resolution from video element
-          if (videoElement.videoWidth && videoElement.videoHeight) {
-            realVideoStats.resolution = `${videoElement.videoWidth}x${videoElement.videoHeight}`;
+          if (videoEl.videoWidth && videoEl.videoHeight) {
+            realVideoStats.resolution = `${videoEl.videoWidth}x${videoEl.videoHeight}`;
           }
 
           // Real codec detection from video element
-          if ((videoElement as any).canPlayType) {
-            if ((videoElement as any).canPlayType('video/mp4; codecs="avc1.42E01E"')) {
+          if ((videoEl as any).canPlayType) {
+            if ((videoEl as any).canPlayType('video/mp4; codecs="avc1.42E01E"')) {
               realVideoStats.codec = 'H.264 (AVC)';
-            } else if ((videoElement as any).canPlayType('video/webm; codecs="vp9"')) {
+            } else if ((videoEl as any).canPlayType('video/webm; codecs="vp9"')) {
               realVideoStats.codec = 'VP9';
-            } else if ((videoElement as any).canPlayType('video/webm; codecs="vp8"')) {
+            } else if ((videoEl as any).canPlayType('video/webm; codecs="vp8"')) {
               realVideoStats.codec = 'VP8';
             }
           }
 
           // Real network data from video element
-          if ((videoElement as any).webkitVideoDecodedByteCount) {
-            videoDataReceived = (videoElement as any).webkitVideoDecodedByteCount;
+          if ((videoEl as any).webkitVideoDecodedByteCount) {
+            videoDataReceived = (videoEl as any).webkitVideoDecodedByteCount;
           }
-          if ((videoElement as any).webkitAudioDecodedByteCount) {
-            videoDataReceived += (videoElement as any).webkitAudioDecodedByteCount;
+          if ((videoEl as any).webkitAudioDecodedByteCount) {
+            videoDataReceived += (videoEl as any).webkitAudioDecodedByteCount;
           }
 
           // Real dropped frames from Video Playback Quality API
-          if ((videoElement as any).getVideoPlaybackQuality) {
+          if ((videoEl as any).getVideoPlaybackQuality) {
             try {
-              const playbackQuality = (videoElement as any).getVideoPlaybackQuality();
+              const playbackQuality = (videoEl as any).getVideoPlaybackQuality();
               // Get REAL dropped frames from browser API
               realVideoStats.droppedFrames = playbackQuality.droppedVideoFrames || 0;
               
               // Real FPS calculation from actual video playback
-              if (playbackQuality.totalVideoFrames && videoElement.currentTime > 0) {
-                realVideoStats.fps = Math.round(playbackQuality.totalVideoFrames / videoElement.currentTime);
+              if (playbackQuality.totalVideoFrames && videoEl.currentTime > 0) {
+                realVideoStats.fps = Math.round(playbackQuality.totalVideoFrames / videoEl.currentTime);
               }
               
               // Additional real metrics if available
@@ -213,37 +213,37 @@ const VideoPlayer = () => {
               }
             } catch (e) {
               // Fallback: check for frame drops using other APIs
-              if ((videoElement as any).webkitDroppedFrameCount) {
-                realVideoStats.droppedFrames = (videoElement as any).webkitDroppedFrameCount;
+              if ((videoEl as any).webkitDroppedFrameCount) {
+                realVideoStats.droppedFrames = (videoEl as any).webkitDroppedFrameCount;
               }
             }
           } else {
             // Alternative real dropped frame detection
-            if ((videoElement as any).webkitDroppedFrameCount !== undefined) {
-              realVideoStats.droppedFrames = (videoElement as any).webkitDroppedFrameCount;
-            } else if ((videoElement as any).mozPresentedFrames && (videoElement as any).mozPaintedFrames) {
+            if ((videoEl as any).webkitDroppedFrameCount !== undefined) {
+              realVideoStats.droppedFrames = (videoEl as any).webkitDroppedFrameCount;
+            } else if ((videoEl as any).mozPresentedFrames && (videoEl as any).mozPaintedFrames) {
               // Firefox alternative
-              const presented = (videoElement as any).mozPresentedFrames;
-              const painted = (videoElement as any).mozPaintedFrames;
+              const presented = (videoEl as any).mozPresentedFrames;
+              const painted = (videoEl as any).mozPaintedFrames;
               realVideoStats.droppedFrames = Math.max(0, presented - painted);
             }
           }
 
           // Real bitrate calculation from actual playback
-          if (videoElement.currentTime > 0 && totalTransferSize > 0) {
-            const realBitrate = (totalTransferSize * 8) / videoElement.currentTime / 1000; // kbps
+          if (videoEl.currentTime > 0 && totalTransferSize > 0) {
+            const realBitrate = (totalTransferSize * 8) / videoEl.currentTime / 1000; // kbps
             if (realBitrate > 0 && realBitrate < 50000) { // Reasonable range
               realVideoStats.bitrate = Math.round(realBitrate);
             }
           }
 
           // Enhanced real buffer health with multiple buffer ranges
-          const buffered = videoElement.buffered;
+          const buffered = videoEl.buffered;
           let totalBufferAhead = 0;
           let bufferRanges = 0;
           
-          if (buffered.length > 0 && videoElement.currentTime >= 0) {
-            const currentTime = videoElement.currentTime;
+          if (buffered.length > 0 && videoEl.currentTime >= 0) {
+            const currentTime = videoEl.currentTime;
             for (let i = 0; i < buffered.length; i++) {
               if (buffered.start(i) <= currentTime && buffered.end(i) > currentTime) {
                 totalBufferAhead += buffered.end(i) - currentTime;
@@ -300,16 +300,16 @@ const VideoPlayer = () => {
 
         // Calculate real streaming health based on multiple factors
         let healthScore = 'Excellent';
-        const videoElement = document.querySelector('video');
+        const videoElement2 = document.querySelector('video');
         
-        if (videoElement) {
+        if (videoElement2) {
           let score = 100;
           
           // Reduce score based on real metrics
           if (realVideoStats.droppedFrames > 5) score -= 30;
           if (bufferHealth < 30) score -= 25;
           if (latency > 100) score -= 20;
-          if (videoElement.readyState < 3) score -= 15;
+          if (videoElement2.readyState < 3) score -= 15;
           if (realDownloadSpeed < 1) score -= 10;
           
           // Determine health status from real data
