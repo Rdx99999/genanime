@@ -179,23 +179,35 @@ const VideoPlayer = () => {
             {/* Video Player */}
             <div className="aspect-video bg-black rounded-lg overflow-hidden relative shadow-xl border border-primary/20">
               {videoUrl ? (
-                <VideoJSPlayer
+                <video
                   src={videoUrl}
-                  startTime={watchProgress[currentEpisode] || 0}
-                  onTimeUpdate={(currentTime) => {
+                  controls
+                  autoPlay
+                  className="w-full h-full"
+                  controlsList="nodownload"
+                  onTimeUpdate={(e) => {
+                    const video = e.currentTarget;
                     // Save progress every 5 seconds
-                    if (currentTime % 5 < 1 && currentTime > 0) {
+                    if (video.currentTime % 5 < 1 && video.currentTime > 0) {
                       setWatchProgress(prev => ({
                         ...prev,
-                        [currentEpisode]: currentTime
+                        [currentEpisode]: video.currentTime
                       }));
                     }
                   }}
-                  onLoadedData={(duration) => {
-                    console.log(`Video loaded with duration: ${duration}s`);
+                  onLoadedData={(e) => {
+                    // Restore saved progress when video loads
+                    const savedTime = watchProgress[currentEpisode];
+                    if (savedTime && e.currentTarget) {
+                      // Only seek if the saved time is less than the total duration (to avoid seeking beyond the end)
+                      if (savedTime < e.currentTarget.duration - 10) {
+                        e.currentTarget.currentTime = savedTime;
+                      }
+                    }
                   }}
-                  className="w-full h-full"
-                />
+                >
+                  Your browser does not support the video tag.
+                </video>
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <p className="text-muted-foreground">No video URL available</p>
