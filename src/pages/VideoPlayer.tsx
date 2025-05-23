@@ -22,7 +22,7 @@ import '@videojs/themes/dist/forest/index.css';
 const VideoPlayerComponent = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const videoRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLElement | null>(null);
   const playerRef = useRef<any>(null);
   const [videoUrl, setVideoUrl] = useState<string>("");
   const [animeTitle, setAnimeTitle] = useState<string>("");
@@ -75,13 +75,31 @@ const VideoPlayerComponent = () => {
 
   // Initialize video.js
   useEffect(() => {
-    if (!videoUrl || !videoRef.current) return;
+    if (!videoUrl) return;
     
     const historyKey = `${animeTitle}-ep${episodeNumber}`;
     const savedTime = watchHistory[historyKey] || 0;
     
+    // Create video element if it doesn't exist
+    if (!videoRef.current) {
+      const videoElement = document.createElement('video-js');
+      videoElement.className = 'video-js vjs-big-play-centered vjs-theme-forest';
+      // Add a unique ID to ensure proper initialization
+      videoElement.id = 'anime-player';
+      
+      // Find the player container and append the video element
+      const playerContainer = document.querySelector('[data-vjs-player]');
+      if (playerContainer) {
+        playerContainer.innerHTML = '';
+        playerContainer.appendChild(videoElement);
+        videoRef.current = videoElement;
+      }
+    }
+    
+    if (!videoRef.current) return;
+    
     const options = {
-      autoplay: true,
+      autoplay: false, // Set to false initially to reduce playback issues
       controls: true,
       responsive: true,
       fluid: true,
@@ -91,41 +109,82 @@ const VideoPlayerComponent = () => {
         type: 'video/mp4'
       }],
       poster: "https://images.unsplash.com/photo-1579547945413-497e1b99dac0?q=80&w=1000",
-      userActions: {
-        hotkeys: true
-      }
+      controlBar: {
+        children: [
+          'playToggle',
+          'volumePanel',
+          'currentTimeDisplay',
+          'timeDivider',
+          'durationDisplay',
+          'progressControl',
+          'remainingTimeDisplay',
+          'fullscreenToggle',
+        ],
+      },
     };
     
-    // Initialize video.js player
-    const player = videojs(videoRef.current, options, function onPlayerReady() {
-      console.log('Player ready');
-      if (savedTime > 0) {
-        this.currentTime(savedTime);
+    // Dispose previous player instance if exists
+    if (playerRef.current) {
+      playerRef.current.dispose();
+      playerRef.current = null;
+    }
+    
+    // Initialize video.js player with a slight delay to ensure DOM is ready
+    setTimeout(() => {
+      try {
+        // Initialize video.js player
+        const player = videojs(videoRef.current, options, function onPlayerReady() {
+          console.log('Player ready');
+          // Try to play after a short delay
+          setTimeout(() => {
+            if (savedTime > 0) {
+              this.currentTime(savedTime);
+            }
+            // Try to play - may be blocked by browser autoplay policy
+            const playPromise = this.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(error => {
+                console.log('Autoplay prevented:', error);
+                // Show play button explicitly
+                this.bigPlayButton.show();
+              });
+            }
+          }, 300);
+        });
+        
+        player.addClass('vjs-theme-forest');
+        
+        // Save player instance to ref
+        playerRef.current = player;
+        
+        // Setup watch history tracking
+        player.on('timeupdate', () => {
+          const currentTime = player.currentTime();
+          if (currentTime > 0) {
+            const historyKey = `${animeTitle}-ep${episodeNumber}`;
+            const newHistory = {...watchHistory, [historyKey]: currentTime};
+            setWatchHistory(newHistory);
+            localStorage.setItem('animeWatchHistory', JSON.stringify(newHistory));
+          }
+        });
+        
+        // Handle end of video
+        player.on('ended', () => {
+          if (episodeNumber < Math.max(...availableEpisodes)) {
+            handleEpisodeChange(episodeNumber + 1);
+          }
+        });
+        
+        // Log errors
+        player.on('error', (e) => {
+          console.error('Video player error:', e);
+          setError('Error playing video: ' + (player.error()?.message || 'Unknown error'));
+        });
+      } catch (err) {
+        console.error('Error initializing player:', err);
+        setError('Failed to initialize video player: ' + err.message);
       }
-    });
-    
-    player.addClass('vjs-theme-forest');
-    
-    // Save player instance to ref
-    playerRef.current = player;
-    
-    // Setup watch history tracking
-    player.on('timeupdate', () => {
-      const currentTime = player.currentTime();
-      if (currentTime > 0) {
-        const historyKey = `${animeTitle}-ep${episodeNumber}`;
-        const newHistory = {...watchHistory, [historyKey]: currentTime};
-        setWatchHistory(newHistory);
-        localStorage.setItem('animeWatchHistory', JSON.stringify(newHistory));
-      }
-    });
-    
-    // Handle end of video
-    player.on('ended', () => {
-      if (episodeNumber < Math.max(...availableEpisodes)) {
-        handleEpisodeChange(episodeNumber + 1);
-      }
-    });
+    }, 100);
     
     // Cleanup
     return () => {
@@ -134,7 +193,7 @@ const VideoPlayerComponent = () => {
         playerRef.current = null;
       }
     };
-  }, [videoUrl, videoRef, animeTitle, episodeNumber, watchHistory, availableEpisodes]);
+  }, [videoUrl, animeTitle, episodeNumber, watchHistory, availableEpisodes]);
 
   const formatTime = (seconds: number): string => {
     if (isNaN(seconds)) return "00:00";
@@ -249,8 +308,8 @@ const VideoPlayerComponent = () => {
             </div>
           
             {videoUrl ? (
-              <div data-vjs-player>
-                <div ref={videoRef} className="video-js vjs-big-play-centered" />
+              <div data-vjs-player className="w-full h-full">
+                {/* Video.js will create and manage the video element */}
               </div>
             ) : (
               <div className="absolute inset-0 flex items-center justify-center bg-black">
