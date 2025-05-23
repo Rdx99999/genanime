@@ -24,6 +24,8 @@ import Contact from "@/pages/Contact";
 import TermsOfService from "@/pages/TermsOfService";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import DMCA from "@/pages/DMCA";
+import VideoPlayer from "@/pages/VideoPlayer";
+import Debug from "@/pages/Debug";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,6 +61,8 @@ const App = () => {
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/dmca" element={<DMCA />} />
+              <Route path="/debug" element={<Debug />} />
+              <Route path="/video" element={<VideoPlayer />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route
                 path="/admin"
