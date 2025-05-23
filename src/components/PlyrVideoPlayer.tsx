@@ -16,6 +16,7 @@ interface PlyrOptions {
 interface PlyrVideoPlayerProps {
   src: string;
   className?: string;
+  onStatsUpdate?: (stats: any) => void;
 }
 
 const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
