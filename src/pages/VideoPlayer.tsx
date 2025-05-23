@@ -117,9 +117,31 @@ const VideoPlayer = () => {
         let realConnectionType = connectionType;
         
         if (connection) {
-          realDownloadSpeed = connection.downlink || connection.bandwidth || 0; // Real Mbps from browser
-          realConnectionType = connection.effectiveType || connection.type || 'unknown';
-          setConnectionType(realConnectionType);
+          // Get REAL download speed from browser Connection API
+          if (connection.downlink !== undefined && connection.downlink > 0) {
+            realDownloadSpeed = connection.downlink; // Real Mbps from browser
+          } else if (connection.bandwidth !== undefined && connection.bandwidth > 0) {
+            realDownloadSpeed = connection.bandwidth; // Alternative real bandwidth
+          }
+          
+          // Update real connection type
+          const detectedType = connection.effectiveType || connection.type;
+          if (detectedType) {
+            realConnectionType = detectedType.toUpperCase();
+            setConnectionType(realConnectionType);
+          }
+        }
+
+        // Additional real speed measurement from actual data transfer
+        if (totalTransferSize > 0 && startTime > 0) {
+          const elapsedTime = (performance.now() - startTime) / 1000; // seconds
+          if (elapsedTime > 0) {
+            const measuredSpeedMbps = (totalTransferSize * 8) / (elapsedTime * 1000000); // Convert to Mbps
+            if (measuredSpeedMbps > 0 && measuredSpeedMbps < 1000) { // Reasonable range
+              // Use the higher of browser reported or measured speed for accuracy
+              realDownloadSpeed = Math.max(realDownloadSpeed, measuredSpeedMbps);
+            }
+          }
         }
 
         // Real bandwidth measurement using Performance Observer
