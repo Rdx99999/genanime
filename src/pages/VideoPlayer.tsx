@@ -464,13 +464,14 @@ const VideoPlayer = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <main className="flex-grow container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-screen-xl">
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
-          className="mb-4 hover:bg-primary/10"
+          className="mb-2 sm:mb-4 hover:bg-primary/10"
+          size="sm"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back
+          <ArrowLeft className="mr-1 h-4 w-4" /> Back
         </Button>
 
         {isLoading ? (
@@ -486,8 +487,8 @@ const VideoPlayer = () => {
             <Button onClick={() => navigate("/")}>Return to Home</Button>
           </div>
         ) : (
-          <div className="space-y-6">
-            <h1 className="text-2xl md:text-3xl font-bold">
+          <div className="space-y-4 sm:space-y-6">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold line-clamp-2">
               {anime?.title || "Video Player"} {currentEpisode && `- Episode ${currentEpisode}`}
             </h1>
 
@@ -506,16 +507,16 @@ const VideoPlayer = () => {
             </div>
 
             {/* Real-time Stats Dashboard */}
-            <div className="bg-card rounded-lg p-4 border shadow-sm">
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <div className="bg-card rounded-lg p-3 sm:p-4 border shadow-sm">
+              <h2 className="text-base sm:text-lg font-semibold mb-3 flex items-center gap-2">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 Live Performance Stats
               </h2>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                <div className="bg-background rounded-lg p-3 border">
-                  <div className="text-sm text-muted-foreground">Streaming Health</div>
-                  <div className="text-lg font-bold">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-3 sm:mb-4">
+                <div className="bg-background rounded-lg p-2 sm:p-3 border">
+                  <div className="text-xs sm:text-sm text-muted-foreground">Streaming Health</div>
+                  <div className="text-base sm:text-lg font-bold">
                     <span className={
                       streamingHealth === 'Excellent' ? 'text-green-500' :
                       streamingHealth === 'Good' ? 'text-blue-500' :
@@ -528,25 +529,25 @@ const VideoPlayer = () => {
                   </div>
                 </div>
                 
-                <div className="bg-background rounded-lg p-3 border">
-                  <div className="text-sm text-muted-foreground">Buffer Health</div>
-                  <div className="text-lg font-bold">
+                <div className="bg-background rounded-lg p-2 sm:p-3 border">
+                  <div className="text-xs sm:text-sm text-muted-foreground">Buffer Health</div>
+                  <div className="text-base sm:text-lg font-bold">
                     <span className={bufferHealth > 70 ? 'text-green-500' : bufferHealth > 30 ? 'text-yellow-500' : 'text-red-500'}>
                       {bufferHealth.toFixed(0)}%
                     </span>
                   </div>
                 </div>
                 
-                <div className="bg-background rounded-lg p-3 border">
-                  <div className="text-sm text-muted-foreground">Connection</div>
-                  <div className="text-lg font-bold text-blue-500">
+                <div className="bg-background rounded-lg p-2 sm:p-3 border">
+                  <div className="text-xs sm:text-sm text-muted-foreground">Connection</div>
+                  <div className="text-base sm:text-lg font-bold text-blue-500">
                     {connectionType.toUpperCase()}
                   </div>
                 </div>
                 
-                <div className="bg-background rounded-lg p-3 border">
-                  <div className="text-sm text-muted-foreground">Latency</div>
-                  <div className="text-lg font-bold">
+                <div className="bg-background rounded-lg p-2 sm:p-3 border">
+                  <div className="text-xs sm:text-sm text-muted-foreground">Latency</div>
+                  <div className="text-base sm:text-lg font-bold">
                     <span className={networkStats.latency < 50 ? 'text-green-500' : networkStats.latency < 100 ? 'text-yellow-500' : 'text-red-500'}>
                       {networkStats.latency.toFixed(0)}ms
                     </span>
@@ -554,10 +555,10 @@ const VideoPlayer = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-background rounded-lg p-3 border">
-                  <h3 className="font-semibold mb-2">Video Quality</h3>
-                  <div className="space-y-1 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                <div className="bg-background rounded-lg p-2 sm:p-3 border">
+                  <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2">Video Quality</h3>
+                  <div className="space-y-1 text-xs sm:text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Resolution:</span>
                       <span className="font-medium">{videoStats.resolution}</span>
@@ -577,9 +578,9 @@ const VideoPlayer = () => {
                   </div>
                 </div>
 
-                <div className="bg-background rounded-lg p-3 border">
-                  <h3 className="font-semibold mb-2">Network Stats</h3>
-                  <div className="space-y-1 text-sm">
+                <div className="bg-background rounded-lg p-2 sm:p-3 border">
+                  <h3 className="font-semibold text-sm sm:text-base mb-1 sm:mb-2">Network Stats</h3>
+                  <div className="space-y-1 text-xs sm:text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Data Received:</span>
                       <span className="font-medium">{(networkStats.bytesReceived / 1024 / 1024).toFixed(1)} MB</span>
@@ -597,7 +598,7 @@ const VideoPlayer = () => {
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Connection:</span>
                       <span className="font-medium flex items-center gap-1">
-                        <span className={`w-2 h-2 rounded-full ${navigator.onLine ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                        <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${navigator.onLine ? 'bg-green-500' : 'bg-red-500'}`}></span>
                         {navigator.onLine ? 'Online' : 'Offline'}
                       </span>
                     </div>
@@ -607,23 +608,23 @@ const VideoPlayer = () => {
             </div>
 
             {/* Episode Controls */}
-            <div className="grid grid-cols-1 md:grid-cols-[3fr_1fr] gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-[3fr_1fr] gap-4 sm:gap-6">
               <div>
-                <h2 className="text-xl font-semibold mb-3">Episodes</h2>
-                <div className="bg-card rounded-lg p-4 border shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Episodes</h2>
+                <div className="bg-card rounded-lg p-3 sm:p-4 border shadow-sm">
                   {Object.keys(episodeLinks).length > 0 ? (
                     <div>
-                      <div className="mb-4">
+                      <div className="mb-3">
                         <Input
                           type="text"
                           placeholder="Search episodes..."
                           value={episodeSearch}
                           onChange={(e) => setEpisodeSearch(e.target.value)}
-                          className="w-full"
+                          className="w-full text-sm"
                         />
                       </div>
                       
-                      <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-1.5 sm:gap-2">
                         {filteredEpisodes.map(episode => {
                           const isWatched = watchProgress[episode] !== undefined;
                           const isCurrentEpisode = currentEpisode === episode;
@@ -637,7 +638,8 @@ const VideoPlayer = () => {
                             <Button
                               key={`episode-${episode}`}
                               variant={isCurrentEpisode ? "default" : "outline"}
-                              className={`h-10 w-full relative ${
+                              size="sm"
+                              className={`h-8 sm:h-10 w-full relative px-1 sm:px-3 text-xs sm:text-sm ${
                                 isCurrentEpisode 
                                   ? "bg-primary text-primary-foreground" 
                                   : isWatched 
@@ -648,7 +650,7 @@ const VideoPlayer = () => {
                             >
                               {episode}
                               {isWatched && !isCurrentEpisode && (
-                                <div className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></div>
+                                <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-primary rounded-full"></div>
                               )}
                             </Button>
                           );
@@ -656,38 +658,39 @@ const VideoPlayer = () => {
                       </div>
                     </div>
                   ) : (
-                    <p className="text-muted-foreground text-center py-4">No episodes available</p>
+                    <p className="text-muted-foreground text-center py-3 text-sm">No episodes available</p>
                   )}
                 </div>
               </div>
 
               <div>
-                <h2 className="text-xl font-semibold mb-3">Quality</h2>
-                <div className="bg-card rounded-lg p-4 border shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Quality</h2>
+                <div className="bg-card rounded-lg p-3 sm:p-4 border shadow-sm">
                   {availableQualities.length > 0 ? (
-                    <div className="space-y-2">
+                    <div className="space-y-1.5 sm:space-y-2">
                       {availableQualities.map((quality) => (
                         <Button
                           key={`quality-${quality}`}
                           variant={currentQuality === quality ? "default" : "outline"}
-                          className={`w-full justify-start ${currentQuality === quality ? "bg-primary text-primary-foreground" : "hover:bg-primary/10"}`}
+                          size="sm"
+                          className={`w-full justify-start text-xs sm:text-sm ${currentQuality === quality ? "bg-primary text-primary-foreground" : "hover:bg-primary/10"}`}
                           onClick={() => changeQuality(quality)}
                         >
-                          <Play className="mr-2 h-4 w-4" /> {quality}
+                          <Play className="mr-1.5 h-3.5 w-3.5" /> {quality}
                         </Button>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-muted-foreground text-center py-4">No quality options available</p>
+                    <p className="text-muted-foreground text-center py-3 text-sm">No quality options available</p>
                   )}
                 </div>
 
                 {/* Download Button */}
                 {videoUrl && (
-                  <div className="mt-4">
-                    <Button variant="outline" className="w-full" asChild>
+                  <div className="mt-3 sm:mt-4">
+                    <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm" asChild>
                       <a href={videoUrl} download target="_blank" rel="noopener noreferrer">
-                        <Download className="mr-2 h-4 w-4" /> Download Episode
+                        <Download className="mr-1.5 h-3.5 w-3.5" /> Download Episode
                       </a>
                     </Button>
                   </div>
@@ -697,10 +700,10 @@ const VideoPlayer = () => {
 
             {/* Anime Description */}
             {anime?.description && (
-              <Card className="mt-6">
-                <CardContent className="pt-6">
-                  <h2 className="text-xl font-semibold mb-2">About {anime.title}</h2>
-                  <p className="text-muted-foreground">{anime.description}</p>
+              <Card className="mt-4 sm:mt-6">
+                <CardContent className="pt-4 sm:pt-6">
+                  <h2 className="text-lg sm:text-xl font-semibold mb-1.5 sm:mb-2">About {anime.title}</h2>
+                  <p className="text-muted-foreground text-sm sm:text-base">{anime.description}</p>
                 </CardContent>
               </Card>
             )}
