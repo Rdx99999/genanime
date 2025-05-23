@@ -48,23 +48,44 @@ const VideoPlayer = () => {
     codec: '',
     droppedFrames: 0
   });
-  const [connectionType, setConnectionType] = useState('Unknown');
+  const [connectionType, setConnectionType] = useState('Detecting...');
 
   // Real-time monitoring functions
   useEffect(() => {
-    // Monitor network connection type
+    // Monitor REAL network connection type from browser
     const updateConnectionType = () => {
       const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+      
       if (connection) {
-        setConnectionType(connection.effectiveType || connection.type || 'Unknown');
+        // Get actual connection type from browser API
+        const realType = connection.effectiveType || connection.type;
+        if (realType) {
+          setConnectionType(realType.toUpperCase());
+        } else if (navigator.onLine) {
+          setConnectionType('ONLINE');
+        } else {
+          setConnectionType('OFFLINE');
+        }
+      } else {
+        // Fallback to basic online/offline detection
+        setConnectionType(navigator.onLine ? 'ONLINE' : 'OFFLINE');
       }
     };
     
+    // Initial real detection
     updateConnectionType();
+    
+    // Listen for real connection changes
+    if ((navigator as any).connection) {
+      (navigator as any).connection.addEventListener('change', updateConnectionType);
+    }
     window.addEventListener('online', updateConnectionType);
     window.addEventListener('offline', updateConnectionType);
     
     return () => {
+      if ((navigator as any).connection) {
+        (navigator as any).connection.removeEventListener('change', updateConnectionType);
+      }
       window.removeEventListener('online', updateConnectionType);
       window.removeEventListener('offline', updateConnectionType);
     };
