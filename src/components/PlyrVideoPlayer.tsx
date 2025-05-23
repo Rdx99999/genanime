@@ -61,7 +61,6 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
         if (videoRef.current && (window as any).Plyr) {
           const plyrOptions: PlyrOptions = {
             controls: [
-              'play-large', 
               'play', 
               'progress', 
               'current-time', 
