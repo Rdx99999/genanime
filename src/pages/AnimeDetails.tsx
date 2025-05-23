@@ -191,11 +191,17 @@ const AnimeDetails = () => {
               
               <div className="bg-secondary/10 p-6 rounded-lg border border-primary/10 shadow-lg">
                 {anime.downloadLinks && anime.downloadLinks.length > 0 ? (
-                  <EpisodeDownloadList downloadLinks={anime.downloadLinks} />
+                  <div>
+                    <h3 className="text-lg font-medium mb-4 flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 mr-2 text-primary"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                      Watch or Download Episodes
+                    </h3>
+                    <EpisodeDownloadList downloadLinks={anime.downloadLinks} />
+                  </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <Download className="h-12 w-12 text-muted-foreground mb-4 opacity-50" />
-                    <p className="text-muted-foreground">No download links available yet</p>
+                    <p className="text-muted-foreground">No episodes available yet</p>
                     <p className="text-xs text-muted-foreground mt-2">Check back later for updates</p>
                   </div>
                 )}

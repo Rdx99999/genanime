@@ -188,12 +188,20 @@ const EpisodeDownloadList = ({ downloadLinks }: EpisodeDownloadListProps) => {
                             <span className="text-xs md:text-sm font-medium ml-1">{link.quality}</span>
                           </div>
                         </div>
-                        <Button size="sm" variant="outline" className="ml-1 md:ml-2 p-1 md:px-3 border-primary/20 hover:bg-primary hover:text-white transition-colors" asChild>
-                          <a href={link.url} target="_blank" rel="noreferrer" className="flex items-center">
-                            <Download className="h-3 w-3 md:h-4 md:w-4 mr-0 md:mr-1" />
-                            <span className="sr-only sm:not-sr-only sm:inline">Download</span>
-                          </a>
-                        </Button>
+                        <div className="flex items-center space-x-1">
+                          <Button size="sm" variant="default" className="ml-1 p-1 md:px-3 border-primary/20 hover:bg-primary hover:text-white transition-colors" asChild>
+                            <a href={`/video?url=${encodeURIComponent(link.url)}&title=${encodeURIComponent("Episode " + link.episodeNumber)}&episode=${link.episodeNumber}&quality=${link.quality}`} className="flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 md:h-4 md:w-4 mr-0 md:mr-1"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                              <span className="sr-only sm:not-sr-only sm:inline">Watch</span>
+                            </a>
+                          </Button>
+                          <Button size="sm" variant="outline" className="p-1 md:px-3 border-primary/20 hover:bg-primary hover:text-white transition-colors" asChild>
+                            <a href={link.url} target="_blank" rel="noreferrer" className="flex items-center">
+                              <Download className="h-3 w-3 md:h-4 md:w-4 mr-0 md:mr-1" />
+                              <span className="sr-only sm:not-sr-only sm:inline">Download</span>
+                            </a>
+                          </Button>
+                        </div>
                       </motion.div>
                     ))}
                   </motion.div>

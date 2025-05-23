@@ -48,7 +48,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev -- --host 0.0.0.0 --port 5000"
+args = "npm run dev -- --host 0.0.0.0 --port 5001"
 
 [deployment]
 run = ["sh", "-c", "npm run preview -- --host 0.0.0.0"]

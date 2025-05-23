@@ -189,8 +189,15 @@ const NewReleases = () => {
                   </div>
 
                   <div>
-                    <h4 className="font-medium text-sm md:text-base mb-1 md:mb-2">Available Downloads</h4>
-                     <EpisodeDownloadList downloadLinks={selectedAnime.downloadLinks} />
+                    <h4 className="font-medium text-sm md:text-base mb-1 md:mb-2">Watch or Download</h4>
+                    {selectedAnime.downloadLinks.length > 0 ? (
+                      <EpisodeDownloadList downloadLinks={selectedAnime.downloadLinks} />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-6 text-center">
+                        <Download className="h-8 w-8 text-muted-foreground mb-3 opacity-50" />
+                        <p className="text-sm text-muted-foreground">No episodes available</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

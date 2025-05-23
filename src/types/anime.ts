@@ -6,6 +6,8 @@ export interface DownloadLink {
   quality: string;
   url: string;
   episodeNumber?: number;
+  streamable?: boolean;
+  thumbnail?: string;
 }
 
 export interface Anime {
