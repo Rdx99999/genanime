@@ -72,8 +72,8 @@ const Popular = () => {
   };
 
   const openAnimeDetails = (anime: Anime) => {
-    setSelectedAnime(anime);
-    setIsDialogOpen(true);
+    // Navigate to the full anime details page instead of showing dialog
+    navigate(`/anime/${anime.id}`);
   };
 
   return (
@@ -123,10 +123,7 @@ const Popular = () => {
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4 md:gap-6">
                 {filteredAnimes.map((anime) => (
                   <div key={anime.id}>
-                    <AnimeCard anime={anime} onClick={(e) => {
-                      e.preventDefault();
-                      openAnimeDetails(anime);
-                    }} />
+                    <AnimeCard anime={anime} />
                   </div>
                 ))}
               </div>
