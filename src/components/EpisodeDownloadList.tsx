@@ -196,7 +196,31 @@ const EpisodeDownloadList = ({ downloadLinks, animeTitle }: EpisodeDownloadListP
                             onClick={() => {
                               // Use the full anime title if available, otherwise use episode number
                               const title = animeTitle ? animeTitle : `Episode ${link.episodeNumber}`;
-                              window.location.href = `/video?url=${encodeURIComponent(link.url)}&title=${encodeURIComponent(title)}&episode=${link.episodeNumber}&quality=${link.quality}`;
+                              
+                              // Use navigate instead of direct window.location for better SPA experience
+                              const videoUrl = `/video?url=${encodeURIComponent(link.url)}&title=${encodeURIComponent(title)}&episode=${link.episodeNumber}&quality=${link.quality}`;
+                              
+                              // Save this episode as recently clicked
+                              try {
+                                const recent = JSON.parse(localStorage.getItem('recentClicks') || '[]');
+                                const newRecent = [
+                                  {
+                                    title,
+                                    episode: link.episodeNumber,
+                                    quality: link.quality,
+                                    timestamp: new Date().toISOString()
+                                  },
+                                  ...recent.filter((i: any) => 
+                                    !(i.title === title && i.episode === link.episodeNumber)
+                                  )
+                                ].slice(0, 10);
+                                localStorage.setItem('recentClicks', JSON.stringify(newRecent));
+                              } catch (e) {
+                                console.error("Error saving recent click:", e);
+                              }
+                              
+                              // Navigate to video player
+                              window.location.href = videoUrl;
                             }}
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 md:h-4 md:w-4 mr-0 md:mr-1"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>

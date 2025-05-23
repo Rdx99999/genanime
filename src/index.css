@@ -14,17 +14,17 @@
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
-  
+
   /* Font settings */
   html {
     font-family: 'Poppins', sans-serif;
   }
-  
+
   h1, h2, h3 {
     font-family: 'Montserrat', sans-serif;
     font-weight: 700;
   }
-  
+
   .anime-title {
     font-family: 'Oswald', sans-serif;
     font-weight: 600;
@@ -32,7 +32,6 @@
   }
 
   :root {
-    /* Crunchyroll-inspired red color scheme */
     --background: 220 20% 9%;
     --foreground: 0 0% 98%;
 
@@ -131,6 +130,40 @@
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-primary;
   }
+}
+
+/* Custom scrollbar for better UX */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 41, 41, 0.3);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 41, 41, 0.5);
+}
+
+/* Custom video player styles */
+video::-webkit-media-controls-timeline {
+  background-color: rgba(255, 41, 41, 0.2);
+}
+
+video::-webkit-media-controls-play-button,
+video::-webkit-media-controls-volume-slider-container,
+video::-webkit-media-controls-volume-slider,
+video::-webkit-media-controls-seek-back-button,
+video::-webkit-media-controls-seek-forward-button,
+video::-webkit-media-controls-fullscreen-button {
+  color: var(--primary);
 }
 
 .anime-card-hover {

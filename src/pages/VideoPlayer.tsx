@@ -50,10 +50,13 @@ const VideoPlayer = () => {
       return;
     }
 
-    // Simulate fetching available qualities and episodes
+    // In a real app, you would fetch this data from your API
+    // For now, we simulate fetching available qualities and episodes
     const mockQualities = ["1080p", "720p", "480p", "360p"];
-    const mockEpisodes = Array.from({ length: 12 }, (_, i) => i + 1);
-
+    
+    // Generate more episodes for better testing
+    const mockEpisodes = Array.from({ length: 24 }, (_, i) => i + 1);
+    
     setAvailableQualities(mockQualities);
     setAvailableEpisodes(mockEpisodes);
     setVideoUrl(url);
@@ -140,8 +143,34 @@ const VideoPlayer = () => {
   };
 
   const handleEpisodeChange = (newEpisode: number) => {
+    setIsLoading(true);
     setEpisodeNumber(newEpisode);
-    navigate(`/video?url=${encodeURIComponent(videoUrl)}&title=${encodeURIComponent(animeTitle)}&episode=${newEpisode}&quality=${quality}`);
+    
+    // In a real app, you would fetch the specific URL for this episode
+    // For demo purposes, we'll just use the same URL with different episode number
+    const episodeUrl = videoUrl;
+    
+    // Navigate to the new episode URL
+    navigate(`/video?url=${encodeURIComponent(episodeUrl)}&title=${encodeURIComponent(animeTitle)}&episode=${newEpisode}&quality=${quality}`);
+    
+    // Update page title to reflect current episode
+    document.title = `${animeTitle} - Episode ${newEpisode}`;
+    
+    // Save to recently watched
+    const recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched') || '[]');
+    const newItem = {
+      id: Date.now(),
+      title: animeTitle,
+      episode: newEpisode,
+      timestamp: new Date().toISOString(),
+      imageUrl: 'https://images.unsplash.com/photo-1579547945413-497e1b99dac0?q=80&w=300' // Placeholder
+    };
+    
+    const filtered = recentlyWatched.filter((item: any) => 
+      !(item.title === animeTitle && item.episode === newEpisode)
+    );
+    
+    localStorage.setItem('recentlyWatched', JSON.stringify([newItem, ...filtered].slice(0, 10)));
   };
 
   const handleShareEpisode = () => {
@@ -229,8 +258,16 @@ const VideoPlayer = () => {
                     height="100%"
                     controls={true}
                     playing={isPlaying}
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
+                    playsinline={true}
+                    volume={0.8}
+                    onPlay={() => {
+                      setIsPlaying(true);
+                      setIsPaused(false);
+                    }}
+                    onPause={() => {
+                      setIsPlaying(false);
+                      setIsPaused(true);
+                    }}
                     onProgress={handleProgress}
                     onDuration={handleDuration}
                     onReady={handleReady}
@@ -241,16 +278,37 @@ const VideoPlayer = () => {
                       file: {
                         attributes: {
                           controlsList: 'nodownload',
-                          poster: "https://images.unsplash.com/photo-1579547945413-497e1b99dac0?q=80&w=1000"
-                        }
+                          poster: "https://images.unsplash.com/photo-1579547945413-497e1b99dac0?q=80&w=1000",
+                          preload: "auto"
+                        },
+                        forceVideo: true
                       }
                     }}
                     style={{ backgroundColor: '#000' }}
+                    fallback={
+                      <div className="flex items-center justify-center h-full bg-black text-white">
+                        <p>Loading video player...</p>
+                      </div>
+                    }
                   />
 
+                  {/* Loading overlay */}
                   {isLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-10">
-                      <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full"></div>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 z-10">
+                      <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full mb-4"></div>
+                      <p className="text-white text-sm">Loading episode {episodeNumber}...</p>
+                    </div>
+                  )}
+                  
+                  {/* Error overlay will be shown if video fails to load */}
+                  {error && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 z-10 p-6">
+                      <div className="bg-red-500/20 p-4 rounded-lg mb-4">
+                        <p className="text-red-400 text-center">{error}</p>
+                      </div>
+                      <Button onClick={() => window.location.reload()}>
+                        Try Again
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -351,28 +409,55 @@ const VideoPlayer = () => {
               transition={{ duration: 0.3, delay: 0.1 }}
               className="bg-secondary/20 p-4 rounded-lg border border-primary/10"
             >
-              <h3 className="font-medium mb-3">Episodes</h3>
-              <div className="grid grid-cols-4 gap-2">
-                {availableEpisodes.map((ep) => {
-                  const historyKey = `${animeTitle}-ep${ep}`;
-                  const hasWatched = !!watchHistory[historyKey];
-                  const isCurrentEpisode = episodeNumber === ep;
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="font-medium">Episodes</h3>
+                <span className="text-xs text-muted-foreground">{availableEpisodes.length} total</span>
+              </div>
+              
+              {/* Episodes grid with scrolling container */}
+              <div className="max-h-[180px] overflow-y-auto pr-1 -mr-1 custom-scrollbar">
+                <div className="grid grid-cols-4 md:grid-cols-5 gap-2">
+                  {availableEpisodes.map((ep) => {
+                    const historyKey = `${animeTitle}-ep${ep}`;
+                    const hasWatched = !!watchHistory[historyKey];
+                    const isCurrentEpisode = episodeNumber === ep;
+                    const watchProgress = watchHistory[historyKey] ? 
+                      Math.min(100, Math.round((watchHistory[historyKey] / 1200) * 100)) : 0;
 
-                  return (
-                    <Button
-                      key={ep}
-                      variant={isCurrentEpisode ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handleEpisodeChange(ep)}
-                      className={`relative ${isCurrentEpisode ? "bg-primary" : ""}`}
-                    >
-                      {ep}
-                      {hasWatched && !isCurrentEpisode && (
-                        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary/70 rounded-full"></div>
-                      )}
-                    </Button>
-                  );
-                })}
+                    return (
+                      <Button
+                        key={ep}
+                        variant={isCurrentEpisode ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleEpisodeChange(ep)}
+                        className={`relative ${isCurrentEpisode ? "bg-primary" : hasWatched ? "border-primary/40" : ""}`}
+                      >
+                        <span>{ep}</span>
+                        
+                        {/* Show progress indicator for watched episodes */}
+                        {hasWatched && !isCurrentEpisode && (
+                          <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-secondary">
+                            <div 
+                              className="h-full bg-primary rounded-full"
+                              style={{ width: `${watchProgress}%` }}
+                            ></div>
+                          </div>
+                        )}
+                        
+                        {/* Current episode indicator */}
+                        {isCurrentEpisode && (
+                          <div className="absolute -top-1 -right-1 h-2 w-2 bg-primary rounded-full animate-pulse"></div>
+                        )}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+              
+              {/* Episode range indicator */}
+              <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                <span>EP 1</span>
+                <span>EP {availableEpisodes.length}</span>
               </div>
             </motion.div>
 
