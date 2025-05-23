@@ -196,7 +196,7 @@ const AnimeDetails = () => {
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 mr-2 text-primary"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                       Watch or Download Episodes
                     </h3>
-                    <EpisodeDownloadList downloadLinks={anime.downloadLinks} />
+                    <EpisodeDownloadList downloadLinks={anime.downloadLinks} animeTitle={anime.title} />
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-center">

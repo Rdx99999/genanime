@@ -1,17 +1,17 @@
-
 import { useState, useMemo, useEffect } from "react";
 import { DownloadLink } from "@/types/anime";
 import { Button } from "@/components/ui/button";
-import { Download, ChevronLeft, ChevronRight } from "lucide-react";
+import { Download, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
 
 interface EpisodeDownloadListProps {
   downloadLinks: DownloadLink[];
+  animeTitle?: string;
 }
 
-const EpisodeDownloadList = ({ downloadLinks }: EpisodeDownloadListProps) => {
+const EpisodeDownloadList = ({ downloadLinks, animeTitle }: EpisodeDownloadListProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState("10");
   const [selectedEpisode, setSelectedEpisode] = useState<number | null>(null);
@@ -24,7 +24,7 @@ const EpisodeDownloadList = ({ downloadLinks }: EpisodeDownloadListProps) => {
     const timer = setTimeout(() => {
       setLoading(false);
     }, 500); // Short timeout to show loading indicator briefly
-    
+
     // Add a timeout to detect if loading hangs
     const errorTimer = setTimeout(() => {
       if (loading) {
@@ -242,7 +242,7 @@ const EpisodeDownloadList = ({ downloadLinks }: EpisodeDownloadListProps) => {
             <div className="flex items-center gap-1">
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 let pageNumber;
-                
+
                 if (totalPages <= 5) {
                   pageNumber = i + 1;
                 } else if (currentPage <= 3) {

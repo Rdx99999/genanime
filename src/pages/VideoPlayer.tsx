@@ -128,8 +128,25 @@ const VideoPlayer = () => {
   };
 
   const handleQualityChange = (newQuality: string) => {
+    // Update URL with new quality
+    const params = new URLSearchParams(location.search);
+    params.set('quality', newQuality);
+    
+    // Keep current video time
+    const currentVideoTime = videoRef.current?.currentTime || 0;
+    
+    // Navigate to the updated URL
+    navigate(`/video?${params.toString()}`);
+    
+    // Update state
     setQuality(newQuality);
-    // In a real app, you would update the video URL based on the quality
+    
+    // After video loads, restore playback position
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.currentTime = currentVideoTime;
+      }
+    }, 500);
   };
 
   const handleEpisodeChange = (newEpisode: number) => {
@@ -223,18 +240,34 @@ const VideoPlayer = () => {
             </div>
 
             {videoUrl ? (
-              <div className="relative w-full h-full" onClick={togglePlayPause}>
-                <video
-                  ref={videoRef}
-                  src={videoUrl}
-                  className="w-full h-full"
-                  poster="https://images.unsplash.com/photo-1579547945413-497e1b99dac0?q=80&w=1000"
-                  controls
-                ></video>
+              <div className="relative w-full h-full">
+                {videoUrl ? (
+                  <>
+                    <video
+                      ref={videoRef}
+                      src={videoUrl}
+                      className="w-full h-full"
+                      poster="https://images.unsplash.com/photo-1579547945413-497e1b99dac0?q=80&w=1000"
+                      controls
+                      autoPlay
+                      controlsList="nodownload"
+                      onLoadStart={() => setIsLoading(true)}
+                      onLoadedData={() => setIsLoading(false)}
+                      onError={() => {
+                        setIsLoading(false);
+                        setError("Error loading video. Please try another quality.");
+                      }}
+                    ></video>
 
-                {isLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-10">
-                    <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full"></div>
+                    {isLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-10">
+                        <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full"></div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black text-white">
+                    Video URL not provided
                   </div>
                 )}
               </div>
