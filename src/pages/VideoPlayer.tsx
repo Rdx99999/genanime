@@ -181,19 +181,6 @@ const VideoPlayer = () => {
               {videoUrl ? (
                 <AdvancedVideoPlayer
                   src={videoUrl}
-                  startTime={watchProgress[currentEpisode] || 0}
-                  onTimeUpdate={(currentTime) => {
-                    // Save progress every 5 seconds
-                    if (currentTime % 5 < 1 && currentTime > 0) {
-                      setWatchProgress(prev => ({
-                        ...prev,
-                        [currentEpisode]: currentTime
-                      }));
-                    }
-                  }}
-                  onLoadedData={(duration) => {
-                    console.log(`Video loaded with duration: ${duration}s`);
-                  }}
                   className="w-full h-full"
                 />
               ) : (

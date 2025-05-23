@@ -4,17 +4,11 @@ import { Button } from '@/components/ui/button';
 
 interface AdvancedVideoPlayerProps {
   src: string;
-  onTimeUpdate?: (currentTime: number) => void;
-  onLoadedData?: (duration: number) => void;
-  startTime?: number;
   className?: string;
 }
 
 const AdvancedVideoPlayer = ({ 
   src, 
-  onTimeUpdate, 
-  onLoadedData, 
-  startTime = 0,
   className = "" 
 }: AdvancedVideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -41,15 +35,10 @@ const AdvancedVideoPlayer = ({
 
     const handleLoadedData = () => {
       setDuration(video.duration);
-      if (onLoadedData) onLoadedData(video.duration);
-      if (startTime > 0 && startTime < video.duration - 10) {
-        video.currentTime = startTime;
-      }
     };
 
     const handleTimeUpdate = () => {
       setCurrentTime(video.currentTime);
-      if (onTimeUpdate) onTimeUpdate(video.currentTime);
     };
 
     const handlePlay = () => setIsPlaying(true);
@@ -66,7 +55,7 @@ const AdvancedVideoPlayer = ({
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
     };
-  }, [src, startTime, onTimeUpdate, onLoadedData]);
+  }, [src]);
 
   const togglePlay = () => {
     const video = videoRef.current;
