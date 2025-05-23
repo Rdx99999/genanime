@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import { getAnimeById } from "@/lib/animeData";
 import { Anime, DownloadLink } from "@/types/anime";
 import { Input } from "@/components/ui/input";
+import VideoJSPlayer from "@/components/VideoJSPlayer";
 
 const VideoPlayer = () => {
   const [searchParams] = useSearchParams();
@@ -31,7 +32,6 @@ const VideoPlayer = () => {
   const [episodeLinks, setEpisodeLinks] = useState<Record<string, DownloadLink[]>>({});
   const [episodeSearch, setEpisodeSearch] = useState<string>("");
   const [watchProgress, setWatchProgress] = useState<Record<string, number>>({});
-  const videoRef = useState<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     if (animeId) {
@@ -179,36 +179,23 @@ const VideoPlayer = () => {
             {/* Video Player */}
             <div className="aspect-video bg-black rounded-lg overflow-hidden relative shadow-xl border border-primary/20">
               {videoUrl ? (
-                <video
-                  ref={(el) => videoRef.current = el}
+                <VideoJSPlayer
                   src={videoUrl}
-                  controls
-                  autoPlay
-                  className="w-full h-full"
-                  controlsList="nodownload"
-                  onTimeUpdate={(e) => {
-                    const video = e.currentTarget;
+                  startTime={watchProgress[currentEpisode] || 0}
+                  onTimeUpdate={(currentTime) => {
                     // Save progress every 5 seconds
-                    if (video.currentTime % 5 < 1 && video.currentTime > 0) {
+                    if (currentTime % 5 < 1 && currentTime > 0) {
                       setWatchProgress(prev => ({
                         ...prev,
-                        [currentEpisode]: video.currentTime
+                        [currentEpisode]: currentTime
                       }));
                     }
                   }}
-                  onLoadedData={(e) => {
-                    // Restore saved progress when video loads
-                    const savedTime = watchProgress[currentEpisode];
-                    if (savedTime && e.currentTarget) {
-                      // Only seek if the saved time is less than the total duration (to avoid seeking beyond the end)
-                      if (savedTime < e.currentTarget.duration - 10) {
-                        e.currentTarget.currentTime = savedTime;
-                      }
-                    }
+                  onLoadedData={(duration) => {
+                    console.log(`Video loaded with duration: ${duration}s`);
                   }}
-                >
-                  Your browser does not support the video tag.
-                </video>
+                  className="w-full h-full"
+                />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <p className="text-muted-foreground">No video URL available</p>
