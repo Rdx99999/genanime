@@ -1,522 +1,243 @@
-
-import { useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Play, Download } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  ArrowLeft, 
-  ChevronLeft, 
-  ChevronRight, 
-  Download, 
-  Share2
-} from "lucide-react";
-import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
-import ReactPlayer from "react-player";
+import { getAnimeById } from "@/lib/animeData";
+import { Anime, DownloadLink } from "@/types/anime";
 
 const VideoPlayer = () => {
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const playerRef = useRef<ReactPlayer>(null);
-  const [videoUrl, setVideoUrl] = useState<string>("");
-  const [animeTitle, setAnimeTitle] = useState<string>("");
-  const [episodeNumber, setEpisodeNumber] = useState<number>(1);
-  const [quality, setQuality] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [anime, setAnime] = useState<Anime | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Video state
+  const initialUrl = searchParams.get("url") || "";
+  const initialEpisode = searchParams.get("episode") || "1";
+  const initialQuality = searchParams.get("quality") || "720p";
+  const animeId = searchParams.get("animeId") || "";
+
+  const [videoUrl, setVideoUrl] = useState(initialUrl);
+  const [currentEpisode, setCurrentEpisode] = useState(initialEpisode);
+  const [currentQuality, setCurrentQuality] = useState(initialQuality);
   const [availableQualities, setAvailableQualities] = useState<string[]>([]);
-  const [availableEpisodes, setAvailableEpisodes] = useState<number[]>([]);
-  const [watchHistory, setWatchHistory] = useState<{[key: string]: number}>({});
-  const [currentTime, setCurrentTime] = useState<number>(0);
-  const [duration, setDuration] = useState<number>(0);
-  const [isPaused, setIsPaused] = useState<boolean>(true);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [hasStarted, setHasStarted] = useState<boolean>(false);
+  const [episodeLinks, setEpisodeLinks] = useState<Record<string, DownloadLink[]>>({});
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const url = params.get("url");
-    const title = params.get("title");
-    const episode = params.get("episode");
-    const qualityParam = params.get("quality");
+    if (animeId) {
+      fetchAnimeDetails(animeId);
+    }
+  }, [animeId]);
 
-    console.log("URL from params:", url);
+  const fetchAnimeDetails = async (id: string) => {
+    try {
+      setIsLoading(true);
+      const animeData = await getAnimeById(id);
+      setAnime(animeData);
 
-    if (!url) {
-      setError("No video URL provided");
+      // Organize episode links by episode number
+      const episodeMap: Record<string, DownloadLink[]> = {};
+
+      if (animeData.downloadLinks && animeData.downloadLinks.length > 0) {
+        animeData.downloadLinks.forEach((link) => {
+          const episode = link.episodeNumber.toString();
+          if (!episodeMap[episode]) {
+            episodeMap[episode] = [];
+          }
+          episodeMap[episode].push(link);
+        });
+
+        // Set available qualities for current episode
+        const currentEpisodeLinks = episodeMap[currentEpisode] || [];
+        const qualities = currentEpisodeLinks.map(link => link.quality);
+        setAvailableQualities(qualities);
+
+        // If URL is not set but we have links, set the URL to the first link of current quality
+        if (!videoUrl && currentEpisodeLinks.length > 0) {
+          const qualityLink = currentEpisodeLinks.find(link => link.quality === currentQuality);
+          if (qualityLink) {
+            setVideoUrl(qualityLink.url);
+          } else if (currentEpisodeLinks[0]) {
+            setVideoUrl(currentEpisodeLinks[0].url);
+            setCurrentQuality(currentEpisodeLinks[0].quality);
+          }
+        }
+      }
+
+      setEpisodeLinks(episodeMap);
+    } catch (err) {
+      console.error("Error fetching anime details:", err);
+      setError("Failed to load anime details");
+    } finally {
       setIsLoading(false);
-      return;
-    }
-
-    // In a real app, you would fetch this data from your API
-    // For now, we simulate fetching available qualities and episodes
-    const mockQualities = ["1080p", "720p", "480p", "360p"];
-    
-    // Generate more episodes for better testing
-    const mockEpisodes = Array.from({ length: 24 }, (_, i) => i + 1);
-    
-    setAvailableQualities(mockQualities);
-    setAvailableEpisodes(mockEpisodes);
-    setVideoUrl(url);
-    setAnimeTitle(title || "Unknown Anime");
-    setEpisodeNumber(episode ? parseInt(episode) : 1);
-    setQuality(qualityParam || mockQualities[0]);
-
-    // Get watch history from localStorage
-    const savedHistory = localStorage.getItem('animeWatchHistory');
-    if (savedHistory) {
-      try {
-        setWatchHistory(JSON.parse(savedHistory));
-      } catch (e) {
-        console.error("Error parsing watch history:", e);
-      }
-    }
-
-    setIsLoading(false);
-  }, [location]);
-
-  // Handle video playback
-  const handleProgress = (state: { played: number; playedSeconds: number; loaded: number; loadedSeconds: number }) => {
-    setCurrentTime(state.playedSeconds);
-
-    // Update watch history
-    if (state.playedSeconds > 0) {
-      const historyKey = `${animeTitle}-ep${episodeNumber}`;
-      const newHistory = {...watchHistory, [historyKey]: state.playedSeconds};
-      setWatchHistory(newHistory);
-      localStorage.setItem('animeWatchHistory', JSON.stringify(newHistory));
     }
   };
 
-  const handleDuration = (duration: number) => {
-    setDuration(duration);
-    setIsLoading(false);
+  const changeEpisode = (episode: string) => {
+    const episodeLinks = anime?.downloadLinks.filter(
+      (link) => link.episodeNumber.toString() === episode
+    ) || [];
 
-    // Restore saved position
-    const historyKey = `${animeTitle}-ep${episodeNumber}`;
-    const savedTime = watchHistory[historyKey] || 0;
-    if (savedTime > 0 && playerRef.current) {
-      playerRef.current.seekTo(savedTime, 'seconds');
+    if (episodeLinks.length > 0) {
+      const qualityLink = episodeLinks.find(link => link.quality === currentQuality);
+      const newUrl = qualityLink ? qualityLink.url : episodeLinks[0].url;
+      const newQuality = qualityLink ? currentQuality : episodeLinks[0].quality;
+
+      setCurrentEpisode(episode);
+      setVideoUrl(newUrl);
+      setCurrentQuality(newQuality);
+
+      // Update qualities available for this episode
+      const qualities = episodeLinks.map(link => link.quality);
+      setAvailableQualities(qualities);
+
+      // Update URL params without refreshing the page
+      navigate(`/video?animeId=${animeId}&url=${encodeURIComponent(newUrl)}&episode=${episode}&quality=${newQuality}`, { replace: true });
     }
   };
 
-  const handleReady = () => {
-    setIsLoading(false);
-    setHasStarted(true);
-  };
+  const changeQuality = (quality: string) => {
+    const episodeLinks = anime?.downloadLinks.filter(
+      (link) => link.episodeNumber.toString() === currentEpisode && link.quality === quality
+    ) || [];
 
-  const handleError = (error: any) => {
-    console.error("Video playback error:", error);
-    setIsLoading(false);
-    setError("Error loading video. Please try another quality or check your network connection.");
-  };
+    if (episodeLinks.length > 0) {
+      setCurrentQuality(quality);
+      setVideoUrl(episodeLinks[0].url);
 
-  const formatTime = (seconds: number): string => {
-    if (isNaN(seconds)) return "00:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const handleQualityChange = (newQuality: string) => {
-    // Update URL with new quality
-    const params = new URLSearchParams(location.search);
-    params.set('quality', newQuality);
-    
-    // Keep current video time
-    const currentVideoTime = currentTime;
-    
-    // Navigate to the updated URL
-    navigate(`/video?${params.toString()}`);
-    
-    // Update state
-    setQuality(newQuality);
-    
-    // After video loads, restore playback position
-    setTimeout(() => {
-      if (playerRef.current) {
-        playerRef.current.seekTo(currentVideoTime, 'seconds');
-      }
-    }, 500);
-  };
-
-  const handleEpisodeChange = (newEpisode: number) => {
-    setIsLoading(true);
-    setEpisodeNumber(newEpisode);
-    
-    // In a real app, you would fetch the specific URL for this episode
-    // For demo purposes, we'll just use the same URL with different episode number
-    const episodeUrl = videoUrl;
-    
-    // Navigate to the new episode URL
-    navigate(`/video?url=${encodeURIComponent(episodeUrl)}&title=${encodeURIComponent(animeTitle)}&episode=${newEpisode}&quality=${quality}`);
-    
-    // Update page title to reflect current episode
-    document.title = `${animeTitle} - Episode ${newEpisode}`;
-    
-    // Save to recently watched
-    const recentlyWatched = JSON.parse(localStorage.getItem('recentlyWatched') || '[]');
-    const newItem = {
-      id: Date.now(),
-      title: animeTitle,
-      episode: newEpisode,
-      timestamp: new Date().toISOString(),
-      imageUrl: 'https://images.unsplash.com/photo-1579547945413-497e1b99dac0?q=80&w=300' // Placeholder
-    };
-    
-    const filtered = recentlyWatched.filter((item: any) => 
-      !(item.title === animeTitle && item.episode === newEpisode)
-    );
-    
-    localStorage.setItem('recentlyWatched', JSON.stringify([newItem, ...filtered].slice(0, 10)));
-  };
-
-  const handleShareEpisode = () => {
-    const shareUrl = window.location.href;
-
-    if (navigator.share) {
-      navigator.share({
-        title: `${animeTitle} - Episode ${episodeNumber}`,
-        text: `Check out ${animeTitle} Episode ${episodeNumber} on GenAnime!`,
-        url: shareUrl,
-      }).catch(err => {
-        console.error('Error sharing:', err);
-      });
-    } else {
-      // Fallback - copy to clipboard
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        alert('Link copied to clipboard!');
-      }).catch(err => {
-        console.error('Error copying link:', err);
-      });
+      // Update URL params without refreshing the page
+      navigate(`/video?animeId=${animeId}&url=${encodeURIComponent(episodeLinks[0].url)}&episode=${currentEpisode}&quality=${quality}`, { replace: true });
     }
   };
 
-  if (isLoading && !hasStarted) {
-    return (
-      <div className="min-h-screen bg-background text-foreground">
-        <Navbar />
-        <div className="container mx-auto flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
-          <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full mb-4"></div>
-          <p className="text-lg">Loading video player...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-background text-foreground">
-        <Navbar />
-        <div className="container mx-auto flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
-          <div className="bg-red-500/10 p-4 rounded-lg mb-4 text-red-500">
-            <p className="text-lg font-medium">{error}</p>
-          </div>
-          <Button onClick={() => navigate(-1)}>
-            <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  // Get unique episode numbers
+  const episodes = Object.keys(episodeLinks).sort((a, b) => parseInt(a) - parseInt(b));
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-4">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate(-1)} 
-            className="mb-4"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
-          </Button>
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">{animeTitle}</h1>
-          <p className="text-muted-foreground">Episode {episodeNumber}</p>
-        </div>
+      <main className="flex-grow container mx-auto px-4 py-8">
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="mb-4 hover:bg-primary/10"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back
+        </Button>
 
-        <div className="relative bg-black rounded-lg overflow-hidden shadow-xl mb-6">
-          <div className="aspect-video relative">
-            {/* Episode badge */}
-            <div className="absolute top-4 left-4 z-20">
-              <Badge variant="secondary" className="bg-primary/80 text-white px-3 py-1 text-sm">
-                Episode {episodeNumber}
-              </Badge>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-muted-foreground">Loading video player...</p>
             </div>
+          </div>
+        ) : error ? (
+          <div className="text-center py-10">
+            <p className="text-destructive text-lg mb-4">{error}</p>
+            <Button onClick={() => navigate("/")}>Return to Home</Button>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <h1 className="text-2xl md:text-3xl font-bold">
+              {anime?.title || "Video Player"} {currentEpisode && `- Episode ${currentEpisode}`}
+            </h1>
 
-            <div className="relative w-full h-full">
+            {/* Video Player */}
+            <div className="aspect-video bg-black rounded-lg overflow-hidden relative shadow-xl border border-primary/20">
               {videoUrl ? (
-                <div className="relative w-full h-full">
-                  <ReactPlayer
-                    ref={playerRef}
-                    url={videoUrl}
-                    width="100%"
-                    height="100%"
-                    controls={true}
-                    playing={isPlaying}
-                    playsinline={true}
-                    volume={0.8}
-                    onPlay={() => {
-                      setIsPlaying(true);
-                      setIsPaused(false);
-                    }}
-                    onPause={() => {
-                      setIsPlaying(false);
-                      setIsPaused(true);
-                    }}
-                    onProgress={handleProgress}
-                    onDuration={handleDuration}
-                    onReady={handleReady}
-                    onError={handleError}
-                    onBuffer={() => setIsLoading(true)}
-                    onBufferEnd={() => setIsLoading(false)}
-                    config={{
-                      file: {
-                        attributes: {
-                          controlsList: 'nodownload',
-                          poster: "https://images.unsplash.com/photo-1579547945413-497e1b99dac0?q=80&w=1000",
-                          preload: "auto"
-                        },
-                        forceVideo: true
-                      }
-                    }}
-                    style={{ backgroundColor: '#000' }}
-                    fallback={
-                      <div className="flex items-center justify-center h-full bg-black text-white">
-                        <p>Loading video player...</p>
-                      </div>
-                    }
-                  />
-
-                  {/* Loading overlay */}
-                  {isLoading && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 z-10">
-                      <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full mb-4"></div>
-                      <p className="text-white text-sm">Loading episode {episodeNumber}...</p>
-                    </div>
-                  )}
-                  
-                  {/* Error overlay will be shown if video fails to load */}
-                  {error && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 z-10 p-6">
-                      <div className="bg-red-500/20 p-4 rounded-lg mb-4">
-                        <p className="text-red-400 text-center">{error}</p>
-                      </div>
-                      <Button onClick={() => window.location.reload()}>
-                        Try Again
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                <video
+                  src={videoUrl}
+                  controls
+                  autoPlay
+                  className="w-full h-full"
+                  controlsList="nodownload"
+                >
+                  Your browser does not support the video tag.
+                </video>
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-black text-white">
-                  Video URL not provided
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <p className="text-muted-foreground">No video URL available</p>
                 </div>
               )}
             </div>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-6">
-          <div className="space-y-6">
-            <div className="bg-secondary/20 p-6 rounded-lg border border-primary/10 shadow-lg">
-              <h2 className="text-xl font-semibold mb-3 flex items-center">
-                Episode Information
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-medium text-primary">{animeTitle}</h3>
-                  <p className="text-foreground/90">Episode {episodeNumber}</p>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium mb-1">Keyboard Shortcuts</h4>
-                  <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
-                    <div>Space - Play/Pause</div>
-                    <div>F - Full Screen</div>
-                    <div>← → - Seek 10 seconds</div>
-                    <div>M - Mute/Unmute</div>
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <div className="flex flex-wrap gap-4">
-                    <a href={videoUrl} download className="inline-flex">
-                      <Button className="flex items-center gap-2 bg-primary hover:bg-primary/90">
-                        <Download className="h-4 w-4" /> Download Episode
-                      </Button>
-                    </a>
-                    <Button 
-                      variant="outline" 
-                      className="flex items-center gap-2 border-primary/20"
-                      onClick={handleShareEpisode}
-                    >
-                      <Share2 className="h-4 w-4" /> Share
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Watch progress */}
-            <div className="bg-secondary/20 p-4 rounded-lg border border-primary/10">
-              <h3 className="font-medium mb-3">Watch Progress</h3>
-              <div className="w-full bg-background/50 h-2 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary rounded-full"
-                  style={{ width: `${(currentTime / duration) * 100 || 0}%` }}
-                ></div>
-              </div>
-              <div className="flex justify-between text-xs mt-1 text-muted-foreground">
-                <span>{formatTime(currentTime)}</span>
-                <span>{formatTime(duration)}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-secondary/20 p-4 rounded-lg border border-primary/10"
-            >
-              <h3 className="font-medium mb-3">Video Quality</h3>
-              <Select
-                value={quality}
-                onValueChange={handleQualityChange}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select quality" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableQualities.map((q) => (
-                    <SelectItem key={q} value={q}>
-                      {q}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-              className="bg-secondary/20 p-4 rounded-lg border border-primary/10"
-            >
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="font-medium">Episodes</h3>
-                <span className="text-xs text-muted-foreground">{availableEpisodes.length} total</span>
-              </div>
-              
-              {/* Episodes grid with scrolling container */}
-              <div className="max-h-[180px] overflow-y-auto pr-1 -mr-1 custom-scrollbar">
-                <div className="grid grid-cols-4 md:grid-cols-5 gap-2">
-                  {availableEpisodes.map((ep) => {
-                    const historyKey = `${animeTitle}-ep${ep}`;
-                    const hasWatched = !!watchHistory[historyKey];
-                    const isCurrentEpisode = episodeNumber === ep;
-                    const watchProgress = watchHistory[historyKey] ? 
-                      Math.min(100, Math.round((watchHistory[historyKey] / 1200) * 100)) : 0;
-
-                    return (
-                      <Button
-                        key={ep}
-                        variant={isCurrentEpisode ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handleEpisodeChange(ep)}
-                        className={`relative ${isCurrentEpisode ? "bg-primary" : hasWatched ? "border-primary/40" : ""}`}
-                      >
-                        <span>{ep}</span>
-                        
-                        {/* Show progress indicator for watched episodes */}
-                        {hasWatched && !isCurrentEpisode && (
-                          <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-secondary">
-                            <div 
-                              className="h-full bg-primary rounded-full"
-                              style={{ width: `${watchProgress}%` }}
-                            ></div>
-                          </div>
-                        )}
-                        
-                        {/* Current episode indicator */}
-                        {isCurrentEpisode && (
-                          <div className="absolute -top-1 -right-1 h-2 w-2 bg-primary rounded-full animate-pulse"></div>
-                        )}
-                      </Button>
-                    );
-                  })}
-                </div>
-              </div>
-              
-              {/* Episode range indicator */}
-              <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                <span>EP 1</span>
-                <span>EP {availableEpisodes.length}</span>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
-              className="space-y-4"
-            >
-              <div className="flex justify-between">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    if (episodeNumber > 1) {
-                      handleEpisodeChange(episodeNumber - 1);
-                    }
-                  }}
-                  disabled={episodeNumber <= 1}
-                  className="flex-1 mr-2"
-                >
-                  <ChevronLeft className="h-4 w-4 mr-2" /> Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    if (episodeNumber < Math.max(...availableEpisodes)) {
-                      handleEpisodeChange(episodeNumber + 1);
-                    }
-                  }}
-                  disabled={episodeNumber >= Math.max(...availableEpisodes)}
-                  className="flex-1 ml-2"
-                >
-                  Next <ChevronRight className="h-4 w-4 ml-2" />
-                </Button>
-              </div>
-
-              {/* Next Episode Recommendation */}
-              {episodeNumber < Math.max(...availableEpisodes) && (
-                <div className="bg-primary/10 p-3 rounded-lg border border-primary/20">
-                  <p className="text-xs text-muted-foreground mb-1">Up Next:</p>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-medium text-sm">{animeTitle}</p>
-                      <p className="text-xs text-muted-foreground">Episode {episodeNumber + 1}</p>
+            {/* Episode Controls */}
+            <div className="grid grid-cols-1 md:grid-cols-[3fr_1fr] gap-6">
+              <div>
+                <h2 className="text-xl font-semibold mb-3">Episodes</h2>
+                <div className="bg-card rounded-lg p-4 border shadow-sm">
+                  {episodes.length > 0 ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                      {episodes.map((episode) => (
+                        <Button
+                          key={`episode-${episode}`}
+                          variant={currentEpisode === episode ? "default" : "outline"}
+                          className={`h-10 w-full ${currentEpisode === episode ? "bg-primary text-primary-foreground" : "hover:bg-primary/10"}`}
+                          onClick={() => changeEpisode(episode)}
+                        >
+                          {episode}
+                        </Button>
+                      ))}
                     </div>
-                    <Button 
-                      size="sm" 
-                      variant="default"
-                      onClick={() => handleEpisodeChange(episodeNumber + 1)}
-                    >
-                      Watch
+                  ) : (
+                    <p className="text-muted-foreground text-center py-4">No episodes available</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-xl font-semibold mb-3">Quality</h2>
+                <div className="bg-card rounded-lg p-4 border shadow-sm">
+                  {availableQualities.length > 0 ? (
+                    <div className="space-y-2">
+                      {availableQualities.map((quality) => (
+                        <Button
+                          key={`quality-${quality}`}
+                          variant={currentQuality === quality ? "default" : "outline"}
+                          className={`w-full justify-start ${currentQuality === quality ? "bg-primary text-primary-foreground" : "hover:bg-primary/10"}`}
+                          onClick={() => changeQuality(quality)}
+                        >
+                          <Play className="mr-2 h-4 w-4" /> {quality}
+                        </Button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground text-center py-4">No quality options available</p>
+                  )}
+                </div>
+
+                {/* Download Button */}
+                {videoUrl && (
+                  <div className="mt-4">
+                    <Button variant="outline" className="w-full" asChild>
+                      <a href={videoUrl} download target="_blank" rel="noopener noreferrer">
+                        <Download className="mr-2 h-4 w-4" /> Download Episode
+                      </a>
                     </Button>
                   </div>
-                </div>
-              )}
-            </motion.div>
+                )}
+              </div>
+            </div>
+
+            {/* Anime Description */}
+            {anime?.description && (
+              <Card className="mt-6">
+                <CardContent className="pt-6">
+                  <h2 className="text-xl font-semibold mb-2">About {anime.title}</h2>
+                  <p className="text-muted-foreground">{anime.description}</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
-        </div>
-      </div>
+        )}
+      </main>
 
       <Footer />
     </div>

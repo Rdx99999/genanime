@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -71,7 +70,7 @@ const AnimeDetails = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
-      
+
       {/* Hero banner with blurred background */}
       <div className="relative w-full h-[300px] overflow-hidden">
         <div className="absolute inset-0 bg-black/60 z-10"></div>
@@ -188,7 +187,7 @@ const AnimeDetails = () => {
                 <div className="h-8 w-1 bg-gradient-to-b from-primary to-primary/30 rounded-full mr-3"></div>
                 <h2 className="text-xl font-semibold">Download Episodes</h2>
               </div>
-              
+
               <div className="bg-secondary/10 p-6 rounded-lg border border-primary/10 shadow-lg">
                 {anime.downloadLinks && anime.downloadLinks.length > 0 ? (
                   <div>
@@ -196,7 +195,11 @@ const AnimeDetails = () => {
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 mr-2 text-primary"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                       Watch or Download Episodes
                     </h3>
-                    <EpisodeDownloadList downloadLinks={anime.downloadLinks} animeTitle={anime.title} />
+                    <EpisodeDownloadList 
+                        downloadLinks={anime.downloadLinks || []} 
+                        episodeCount={anime.episodes}
+                        animeId={anime.id}
+                      />
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
