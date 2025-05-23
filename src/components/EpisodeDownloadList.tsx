@@ -38,8 +38,8 @@ const EpisodeDownloadList = ({ downloadLinks, episodeCount, animeId }: EpisodeDo
     episodeMap[episode].push(link);
   });
   
-  // Get array of episode numbers
-  const episodeNumbers = Object.keys(episodeMap).map(Number).sort((a, b) => b - a);
+  // Get array of episode numbers sorted in ascending order (1, 2, 3, ...)
+  const episodeNumbers = Object.keys(episodeMap).map(Number).sort((a, b) => a - b);
   
   // Get available qualities across all episodes
   const allQualities = Array.from(new Set(downloadLinks.map(link => link.quality)));

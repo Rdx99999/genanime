@@ -30,12 +30,28 @@ const VideoPlayer = () => {
   const [availableQualities, setAvailableQualities] = useState<string[]>([]);
   const [episodeLinks, setEpisodeLinks] = useState<Record<string, DownloadLink[]>>({});
   const [episodeSearch, setEpisodeSearch] = useState<string>("");
+  const [watchProgress, setWatchProgress] = useState<Record<string, number>>({});
+  const videoRef = useState<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     if (animeId) {
       fetchAnimeDetails(animeId);
+      // Load saved progress from localStorage
+      const savedProgress = localStorage.getItem(`anime-progress-${animeId}`);
+      if (savedProgress) {
+        setWatchProgress(JSON.parse(savedProgress));
+      }
     }
   }, [animeId]);
+
+  // Save progress to localStorage when component unmounts
+  useEffect(() => {
+    return () => {
+      if (animeId && Object.keys(watchProgress).length > 0) {
+        localStorage.setItem(`anime-progress-${animeId}`, JSON.stringify(watchProgress));
+      }
+    };
+  }, [animeId, watchProgress]);
 
   const fetchAnimeDetails = async (id: string) => {
     try {
@@ -122,7 +138,7 @@ const VideoPlayer = () => {
     }
   };
 
-  // Get unique episode numbers
+  // Get unique episode numbers and sort numerically in ascending order
   const episodes = Object.keys(episodeLinks).sort((a, b) => parseInt(a) - parseInt(b));
 
   const filteredEpisodes = episodes.filter(episode => 
@@ -164,11 +180,32 @@ const VideoPlayer = () => {
             <div className="aspect-video bg-black rounded-lg overflow-hidden relative shadow-xl border border-primary/20">
               {videoUrl ? (
                 <video
+                  ref={(el) => videoRef.current = el}
                   src={videoUrl}
                   controls
                   autoPlay
                   className="w-full h-full"
                   controlsList="nodownload"
+                  onTimeUpdate={(e) => {
+                    const video = e.currentTarget;
+                    // Save progress every 5 seconds
+                    if (video.currentTime % 5 < 1 && video.currentTime > 0) {
+                      setWatchProgress(prev => ({
+                        ...prev,
+                        [currentEpisode]: video.currentTime
+                      }));
+                    }
+                  }}
+                  onLoadedData={(e) => {
+                    // Restore saved progress when video loads
+                    const savedTime = watchProgress[currentEpisode];
+                    if (savedTime && e.currentTarget) {
+                      // Only seek if the saved time is less than the total duration (to avoid seeking beyond the end)
+                      if (savedTime < e.currentTarget.duration - 10) {
+                        e.currentTarget.currentTime = savedTime;
+                      }
+                    }
+                  }}
                 >
                   Your browser does not support the video tag.
                 </video>
@@ -197,16 +234,35 @@ const VideoPlayer = () => {
                       </div>
                       
                       <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                        {filteredEpisodes.map(episode => (
-                          <Button
-                            key={`episode-${episode}`}
-                            variant={currentEpisode === episode ? "default" : "outline"}
-                            className={`h-10 w-full ${currentEpisode === episode ? "bg-primary text-primary-foreground" : "hover:bg-primary/10"}`}
-                            onClick={() => changeEpisode(episode)}
-                          >
-                            {episode}
-                          </Button>
-                        ))}
+                        {filteredEpisodes.map(episode => {
+                          const isWatched = watchProgress[episode] !== undefined;
+                          const isCurrentEpisode = currentEpisode === episode;
+                          
+                          // Calculate whether the episode is completely watched (> 90% of duration)
+                          const episodeLinks = anime?.downloadLinks.filter(
+                            (link) => link.episodeNumber.toString() === episode
+                          ) || [];
+                          
+                          return (
+                            <Button
+                              key={`episode-${episode}`}
+                              variant={isCurrentEpisode ? "default" : "outline"}
+                              className={`h-10 w-full relative ${
+                                isCurrentEpisode 
+                                  ? "bg-primary text-primary-foreground" 
+                                  : isWatched 
+                                    ? "border-primary/50 hover:bg-primary/10" 
+                                    : "hover:bg-primary/10"
+                              }`}
+                              onClick={() => changeEpisode(episode)}
+                            >
+                              {episode}
+                              {isWatched && !isCurrentEpisode && (
+                                <div className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></div>
+                              )}
+                            </Button>
+                          );
+                        })}
                       </div>
                     </div>
                   ) : (
