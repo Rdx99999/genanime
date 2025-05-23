@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import { Anime } from "@/types/anime";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download, Star, Info, Calendar, FileVideo } from "lucide-react";
+import { ArrowLeft, Download, Star, Info, Calendar, FileVideo, Play } from "lucide-react";
 import EpisodeDownloadList from "@/components/EpisodeDownloadList";
 import { getAnimeById } from "@/lib/animeData";
 import Footer from "@/components/Footer";

@@ -21,6 +21,7 @@ const VideoPlayer = () => {
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [availableQualities, setAvailableQualities] = useState<string[]>([]);
   const [availableEpisodes, setAvailableEpisodes] = useState<number[]>([]);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -47,8 +48,18 @@ const VideoPlayer = () => {
     setEpisodeNumber(episode ? parseInt(episode) : 1);
     setQuality(qualityParam || mockQualities[0]);
     
+    // Start playback automatically
     setTimeout(() => {
       setIsLoading(false);
+      setIsPlaying(true);
+      
+      // Auto-play video when loaded
+      const videoElement = document.getElementById("video-player") as HTMLVideoElement;
+      if (videoElement) {
+        videoElement.play().catch(err => {
+          console.error("Error auto-playing video:", err);
+        });
+      }
     }, 1000);
   }, [location]);
 
@@ -151,13 +162,39 @@ const VideoPlayer = () => {
                 className="w-full h-full" 
                 controls 
                 autoPlay
+                preload="auto"
                 poster="https://images.unsplash.com/photo-1579547945413-497e1b99dac0?q=80&w=1000"
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onEnded={() => {
+                  // Optionally navigate to next episode
+                  if (episodeNumber < Math.max(...availableEpisodes)) {
+                    handleEpisodeChange(episodeNumber + 1);
+                  }
+                }}
               >
                 Your browser does not support the video tag.
               </video>
             ) : (
               <div className="absolute inset-0 flex items-center justify-center bg-black">
                 <p className="text-white">No video source available</p>
+              </div>
+            )}
+            
+            {/* Loading overlay */}
+            {videoUrl && !isPlaying && !isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 cursor-pointer"
+                   onClick={() => {
+                     const videoElement = document.getElementById("video-player") as HTMLVideoElement;
+                     if (videoElement) {
+                       videoElement.play().catch(err => {
+                         console.error("Error playing video:", err);
+                       });
+                     }
+                   }}>
+                <div className="rounded-full bg-primary/90 p-5 hover:bg-primary transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8 text-white"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </div>
               </div>
             )}
           </div>
