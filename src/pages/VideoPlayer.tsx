@@ -50,55 +50,60 @@ const VideoPlayer = () => {
   });
   const [connectionType, setConnectionType] = useState('Detecting...');
 
-  // Real-time monitoring functions
+  // Simplified network monitoring
   useEffect(() => {
-    // Monitor REAL network connection type from browser
     const updateConnectionType = () => {
-      const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
-      
-      if (connection) {
-        // Get actual connection type from browser API
-        const realType = connection.effectiveType || connection.type;
-        if (realType) {
-          setConnectionType(realType.toUpperCase());
-        } else if (navigator.onLine) {
-          setConnectionType('ONLINE');
-        } else {
+      try {
+        const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+        
+        if (!navigator.onLine) {
           setConnectionType('OFFLINE');
+          return;
         }
-      } else {
-        // Fallback to basic online/offline detection
+        
+        if (connection && connection.effectiveType) {
+          // Map connection types to readable names
+          const typeMap: Record<string, string> = {
+            'slow-2g': '2G',
+            '2g': '2G',
+            '3g': '3G',
+            '4g': '4G',
+            '5g': '5G'
+          };
+          setConnectionType(typeMap[connection.effectiveType] || connection.effectiveType.toUpperCase());
+        } else {
+          setConnectionType('ONLINE');
+        }
+      } catch (error) {
         setConnectionType(navigator.onLine ? 'ONLINE' : 'OFFLINE');
       }
     };
     
-    // Initial real detection
     updateConnectionType();
     
-    // Listen for real connection changes
-    if ((navigator as any).connection) {
-      (navigator as any).connection.addEventListener('change', updateConnectionType);
-    }
+    // Add event listeners
     window.addEventListener('online', updateConnectionType);
     window.addEventListener('offline', updateConnectionType);
     
+    const connection = (navigator as any).connection;
+    if (connection) {
+      connection.addEventListener('change', updateConnectionType);
+    }
+    
     return () => {
-      if ((navigator as any).connection) {
-        (navigator as any).connection.removeEventListener('change', updateConnectionType);
-      }
       window.removeEventListener('online', updateConnectionType);
       window.removeEventListener('offline', updateConnectionType);
+      if (connection) {
+        connection.removeEventListener('change', updateConnectionType);
+      }
     };
   }, []);
 
-  // Real network performance monitoring
+  // Simplified network performance monitoring
   useEffect(() => {
-    let startTime = performance.now();
-    let lastBytesReceived = 0;
-
-    const measureRealPerformance = async () => {
+    const measurePerformance = async () => {
       try {
-        // Real network latency measurement with multiple endpoints
+        // Simple latency measurement
         const pingStart = performance.now();
         try {
           await fetch(window.location.origin + '/favicon.ico', { 
@@ -106,48 +111,23 @@ const VideoPlayer = () => {
             cache: 'no-cache'
           });
         } catch {
-          // Fallback ping
-          await fetch('data:text/plain,', { method: 'HEAD' });
+          // If favicon fails, test with a simple data URL
+          await fetch('data:,');
         }
         const latency = performance.now() - pingStart;
 
-        // Real network connection info from Browser APIs
-        const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
-        let realDownloadSpeed = 0;
-        let realConnectionType = connectionType;
+        // Get network data from browser API
+        const connection = (navigator as any).connection;
+        let downloadSpeed = 0;
         
-        if (connection) {
-          realDownloadSpeed = connection.downlink || connection.bandwidth || 0; // Real Mbps from browser
-          realConnectionType = connection.effectiveType || connection.type || 'unknown';
-          setConnectionType(realConnectionType);
+        if (connection && connection.downlink) {
+          downloadSpeed = connection.downlink;
         }
 
-        // Real bandwidth measurement using Performance Observer
-        if ('PerformanceObserver' in window) {
-          try {
-            const observer = new PerformanceObserver((list) => {
-              const entries = list.getEntries();
-              entries.forEach((entry: any) => {
-                if (entry.transferSize && entry.duration && entry.duration > 0) {
-                  const speedMbps = (entry.transferSize * 8) / (entry.duration * 1000); // Convert to Mbps
-                  if (speedMbps > 0 && speedMbps < 1000) { // Reasonable range
-                    realDownloadSpeed = Math.max(realDownloadSpeed, speedMbps);
-                  }
-                }
-              });
-            });
-            observer.observe({ entryTypes: ['resource'] });
-          } catch (e) {
-            console.log('PerformanceObserver not available');
-          }
-        }
-
-        // Real performance metrics from browser
-        const perfEntries = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+        // Calculate network transfer data
         const resourceEntries = performance.getEntriesByType('resource');
-        
-        // Calculate real data transfer
         let totalTransferSize = 0;
+        
         resourceEntries.forEach((entry: any) => {
           if (entry.transferSize) {
             totalTransferSize += entry.transferSize;
@@ -330,7 +310,7 @@ const VideoPlayer = () => {
           if (bufferHealth < 30) score -= 25;
           if (latency > 100) score -= 20;
           if (videoElement2.readyState < 3) score -= 15;
-          if (realDownloadSpeed < 1) score -= 10;
+          if (downloadSpeed < 1) score -= 10;
           
           // Determine health status from real data
           if (score >= 85) healthScore = 'Excellent';
@@ -360,10 +340,10 @@ const VideoPlayer = () => {
     };
 
     // Initial measurement
-    measureRealPerformance();
+    measurePerformance();
     
     // Real-time updates every 2 seconds
-    const interval = setInterval(measureRealPerformance, 2000);
+    const interval = setInterval(measurePerformance, 2000);
 
     return () => clearInterval(interval);
   }, [currentQuality]);
