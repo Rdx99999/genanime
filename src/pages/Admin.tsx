@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -15,17 +16,14 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Check, Edit, Plus, Search, Trash2, X, Loader2, Star, Clock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Check, Edit, Plus, Search, Trash2, X, Loader2, Star, Clock, Info, Eye } from "lucide-react";
 import AdminNavbar from "@/components/AdminNavbar";
-import AnimeForm from "@/components/AnimeForm";
 import { Anime } from "@/types/anime";
 import { 
   getAllAnimes, 
   getAnimeById, 
-  createAnime, 
-  updateAnime, 
   deleteAnime,
-  updateAnimeStatus,
   toggleAnimePopular, 
   toggleAnimeNewRelease 
 } from "@/lib/animeData";
@@ -39,14 +37,13 @@ const Admin = () => {
   const [filteredAnimes, setFilteredAnimes] = useState<Anime[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAnime, setSelectedAnime] = useState<Anime | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  // These state variables are now redundant since status is stored in the anime object
-  // But we'll keep them for backward compatibility
+  // These state variables track feature status for UI display
   const [popularAnimes, setPopularAnimes] = useState<Record<string, boolean>>({});
   const [newReleases, setNewReleases] = useState<Record<string, boolean>>({});
 
@@ -57,27 +54,26 @@ const Admin = () => {
   }, []);
 
   useEffect(() => {
-    if (searchQuery.trim() === "") {
-      if (activeTab === "all") {
-        setFilteredAnimes(animes);
-      } else if (activeTab === "popular") {
-        setFilteredAnimes(animes.filter(anime => popularAnimes[anime.id]));
-      } else if (activeTab === "new") {
-        setFilteredAnimes(animes.filter(anime => newReleases[anime.id]));
-      }
-    } else {
-      let filtered = animes.filter(
+    let filtered = animes;
+    
+    // Apply search filter
+    if (searchQuery.trim() !== "") {
+      filtered = filtered.filter(
         anime => anime.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
-
-      if (activeTab === "popular") {
-        filtered = filtered.filter(anime => popularAnimes[anime.id]);
-      } else if (activeTab === "new") {
-        filtered = filtered.filter(anime => newReleases[anime.id]);
-      }
-
-      setFilteredAnimes(filtered);
     }
+    
+    // Apply tab filter
+    if (activeTab === "popular") {
+      filtered = filtered.filter(anime => popularAnimes[anime.id]);
+    } else if (activeTab === "new") {
+      filtered = filtered.filter(anime => newReleases[anime.id]);
+    }
+    
+    // Sort animes by title for easier navigation
+    filtered = [...filtered].sort((a, b) => a.title.localeCompare(b.title));
+    
+    setFilteredAnimes(filtered);
   }, [searchQuery, animes, activeTab, popularAnimes, newReleases]);
 
   const loadAnimes = async () => {
@@ -117,10 +113,6 @@ const Admin = () => {
     }
   };
 
-  // handleCreateAnime removed - now handled in CreateAnime page
-
-  // handleUpdateAnime removed - now handled in EditAnime page
-
   const handleDeleteAnime = async () => {
     if (!selectedAnime) return;
 
@@ -146,6 +138,10 @@ const Admin = () => {
 
   const openEditDialog = (anime: Anime) => {
     navigate(`/admin/edit/${anime.id}`);
+  };
+
+  const openDetailView = (anime: Anime) => {
+    navigate(`/anime/${anime.id}`);
   };
 
   const openDeleteDialog = (anime: Anime) => {
@@ -225,46 +221,86 @@ const Admin = () => {
     }
   };
 
+  const renderAnimeStatus = (anime: Anime) => {
+    return (
+      <div className="flex flex-wrap gap-1">
+        {popularAnimes[anime.id] && (
+          <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30">
+            <Star className="w-3 h-3 mr-1" /> Popular
+          </Badge>
+        )}
+        {newReleases[anime.id] && (
+          <Badge variant="secondary" className="bg-blue-500/20 text-blue-500 hover:bg-blue-500/30">
+            <Clock className="w-3 h-3 mr-1" /> New Release
+          </Badge>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <AdminNavbar />
 
       <div className="container mx-auto py-6 px-4">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Anime Management</h1>
-          <Button onClick={() => navigate("/admin/create")}>
-            <Plus className="mr-2 h-4 w-4" /> Add New Anime
-          </Button>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <div>
+            <h1 className="text-2xl font-bold">Anime Management</h1>
+            <p className="text-muted-foreground">Manage your anime collection and featured content</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => loadAnimes()}>
+              <Loader2 className="mr-2 h-4 w-4" /> Refresh
+            </Button>
+            <Button onClick={() => navigate("/admin/create")}>
+              <Plus className="mr-2 h-4 w-4" /> Add New Anime
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="all">All Anime</TabsTrigger>
-            <TabsTrigger value="popular">Popular Anime</TabsTrigger>
-            <TabsTrigger value="new">New Releases</TabsTrigger>
+            <TabsTrigger value="all" className="flex items-center justify-center">
+              <Info className="h-4 w-4 mr-2" /> All Anime 
+              <Badge className="ml-2 bg-primary/20">{animes.length}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="popular" className="flex items-center justify-center">
+              <Star className="h-4 w-4 mr-2" /> Popular
+              <Badge className="ml-2 bg-yellow-500/20 text-yellow-500">
+                {Object.values(popularAnimes).filter(Boolean).length}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="new" className="flex items-center justify-center">
+              <Clock className="h-4 w-4 mr-2" /> New Releases
+              <Badge className="ml-2 bg-blue-500/20 text-blue-500">
+                {Object.values(newReleases).filter(Boolean).length}
+              </Badge>
+            </TabsTrigger>
           </TabsList>
+
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search anime by title..."
+                  className="pl-8 w-full"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </CardContent>
+          </Card>
 
           <TabsContent value="all" className="mt-0">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle>Anime Collection</CardTitle>
+                <CardTitle className="text-xl">Anime Collection</CardTitle>
                 <CardDescription>
-                  Manage your anime entries and download links
+                  Manage your anime entries, features, and download links
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center mb-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search anime..."
-                      className="pl-8"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
-                </div>
-
                 {isLoading ? (
                   <div className="flex justify-center items-center py-10">
                     <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
@@ -288,56 +324,72 @@ const Admin = () => {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Title</TableHead>
-                          <TableHead>Year</TableHead>
-                          <TableHead>Episodes</TableHead>
-                          <TableHead>Popular</TableHead>
-                          <TableHead>New Release</TableHead>
-                          <TableHead className="w-[100px]">Actions</TableHead>
+                          <TableHead>Title & Info</TableHead>
+                          <TableHead className="hidden md:table-cell">Status</TableHead>
+                          <TableHead>Features</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {filteredAnimes.map((anime) => (
                           <TableRow key={anime.id}>
-                            <TableCell className="font-medium">{anime.title}</TableCell>
-                            <TableCell>{anime.releaseYear}</TableCell>
-                            <TableCell>{anime.episodes}</TableCell>
                             <TableCell>
-                              <div className="flex items-center space-x-2">
-                                <Switch 
-                                  id={`popular-${anime.id}`} 
-                                  checked={!!popularAnimes[anime.id]}
-                                  onCheckedChange={() => togglePopular(anime.id)}
-                                />
-                                <Label htmlFor={`popular-${anime.id}`} className="sr-only">Popular</Label>
+                              <div className="font-medium">{anime.title}</div>
+                              <div className="text-sm text-muted-foreground flex flex-wrap gap-x-4 mt-1">
+                                <span>{anime.releaseYear}</span>
+                                <span>{anime.episodes} episodes</span>
+                              </div>
+                              <div className="md:hidden mt-2">
+                                {renderAnimeStatus(anime)}
                               </div>
                             </TableCell>
-                            <TableCell>
-                              <div className="flex items-center space-x-2">
-                                <Switch 
-                                  id={`new-${anime.id}`} 
-                                  checked={!!newReleases[anime.id]}
-                                  onCheckedChange={() => toggleNewRelease(anime.id)}
-                                />
-                                <Label htmlFor={`new-${anime.id}`} className="sr-only">New Release</Label>
-                              </div>
+                            <TableCell className="hidden md:table-cell">
+                              {renderAnimeStatus(anime)}
                             </TableCell>
                             <TableCell>
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-col gap-2">
+                                <div className="flex items-center space-x-2">
+                                  <Switch 
+                                    id={`popular-${anime.id}`} 
+                                    checked={!!popularAnimes[anime.id]}
+                                    onCheckedChange={() => togglePopular(anime.id)}
+                                  />
+                                  <Label htmlFor={`popular-${anime.id}`} className="text-sm">Popular</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <Switch 
+                                    id={`new-${anime.id}`} 
+                                    checked={!!newReleases[anime.id]}
+                                    onCheckedChange={() => toggleNewRelease(anime.id)}
+                                  />
+                                  <Label htmlFor={`new-${anime.id}`} className="text-sm">New Release</Label>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
                                 <Button 
-                                  variant="ghost" 
-                                  size="icon"
-                                  onClick={() => openEditDialog(anime)}
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => openDetailView(anime)}
+                                  className="hidden md:flex"
                                 >
-                                  <Edit className="h-4 w-4" />
+                                  <Eye className="h-4 w-4 mr-1" /> View
                                 </Button>
                                 <Button 
-                                  variant="ghost" 
-                                  size="icon"
-                                  onClick={() => openDeleteDialog(anime)}
-                                  className="text-destructive"
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => openEditDialog(anime)}
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <Edit className="h-4 w-4 md:mr-1" /> <span className="hidden md:inline">Edit</span>
+                                </Button>
+                                <Button 
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => openDeleteDialog(anime)}
+                                  className="text-destructive border-destructive/20 hover:bg-destructive/10"
+                                >
+                                  <Trash2 className="h-4 w-4 md:mr-1" /> <span className="hidden md:inline">Delete</span>
                                 </Button>
                               </div>
                             </TableCell>
@@ -348,33 +400,26 @@ const Admin = () => {
                   </div>
                 )}
               </CardContent>
+              <CardFooter className="flex justify-between border-t pt-6">
+                <div className="text-sm text-muted-foreground">
+                  Showing {filteredAnimes.length} of {animes.length} animes
+                </div>
+              </CardFooter>
             </Card>
           </TabsContent>
 
           <TabsContent value="popular" className="mt-0">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center">
+                <CardTitle className="flex items-center text-xl">
                   <Star className="h-5 w-5 mr-2 text-yellow-500" />
                   Popular Anime
                 </CardTitle>
                 <CardDescription>
-                  Manage animes featured in the Popular section
+                  Manage animes featured in the Popular section of your website
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center mb-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search popular anime..."
-                      className="pl-8"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
-                </div>
-
                 {isLoading ? (
                   <div className="flex justify-center items-center py-10">
                     <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
@@ -394,19 +439,21 @@ const Admin = () => {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Title</TableHead>
-                          <TableHead>Year</TableHead>
-                          <TableHead>Episodes</TableHead>
-                          <TableHead>Popular</TableHead>
-                          <TableHead className="w-[100px]">Actions</TableHead>
+                          <TableHead>Title & Info</TableHead>
+                          <TableHead>Popular Status</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {filteredAnimes.map((anime) => (
                           <TableRow key={anime.id}>
-                            <TableCell className="font-medium">{anime.title}</TableCell>
-                            <TableCell>{anime.releaseYear}</TableCell>
-                            <TableCell>{anime.episodes}</TableCell>
+                            <TableCell>
+                              <div className="font-medium">{anime.title}</div>
+                              <div className="text-sm text-muted-foreground flex flex-wrap gap-x-4 mt-1">
+                                <span>{anime.releaseYear}</span>
+                                <span>{anime.episodes} episodes</span>
+                              </div>
+                            </TableCell>
                             <TableCell>
                               <div className="flex items-center space-x-2">
                                 <Switch 
@@ -414,16 +461,25 @@ const Admin = () => {
                                   checked={!!popularAnimes[anime.id]}
                                   onCheckedChange={() => togglePopular(anime.id)}
                                 />
+                                <Label htmlFor={`popular-tab-${anime.id}`}>Featured in Popular</Label>
                               </div>
                             </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
                                 <Button 
-                                  variant="ghost" 
-                                  size="icon"
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => openDetailView(anime)}
+                                  className="hidden md:flex"
+                                >
+                                  <Eye className="h-4 w-4 mr-1" /> View
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
                                   onClick={() => openEditDialog(anime)}
                                 >
-                                  <Edit className="h-4 w-4" />
+                                  <Edit className="h-4 w-4 md:mr-1" /> <span className="hidden md:inline">Edit</span>
                                 </Button>
                               </div>
                             </TableCell>
@@ -440,27 +496,15 @@ const Admin = () => {
           <TabsContent value="new" className="mt-0">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center">
+                <CardTitle className="flex items-center text-xl">
                   <Clock className="h-5 w-5 mr-2 text-blue-500" />
                   New Releases
                 </CardTitle>
                 <CardDescription>
-                  Manage animes featured in the New Releases section
+                  Manage animes featured in the New Releases section of your website
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center mb-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search new releases..."
-                      className="pl-8"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
-                </div>
-
                 {isLoading ? (
                   <div className="flex justify-center items-center py-10">
                     <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
@@ -480,19 +524,21 @@ const Admin = () => {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Title</TableHead>
-                          <TableHead>Year</TableHead>
-                          <TableHead>Episodes</TableHead>
-                          <TableHead>New Release</TableHead>
-                          <TableHead className="w-[100px]">Actions</TableHead>
+                          <TableHead>Title & Info</TableHead>
+                          <TableHead>New Release Status</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {filteredAnimes.map((anime) => (
                           <TableRow key={anime.id}>
-                            <TableCell className="font-medium">{anime.title}</TableCell>
-                            <TableCell>{anime.releaseYear}</TableCell>
-                            <TableCell>{anime.episodes}</TableCell>
+                            <TableCell>
+                              <div className="font-medium">{anime.title}</div>
+                              <div className="text-sm text-muted-foreground flex flex-wrap gap-x-4 mt-1">
+                                <span>{anime.releaseYear}</span>
+                                <span>{anime.episodes} episodes</span>
+                              </div>
+                            </TableCell>
                             <TableCell>
                               <div className="flex items-center space-x-2">
                                 <Switch 
@@ -500,16 +546,25 @@ const Admin = () => {
                                   checked={!!newReleases[anime.id]}
                                   onCheckedChange={() => toggleNewRelease(anime.id)}
                                 />
+                                <Label htmlFor={`new-tab-${anime.id}`}>Featured in New Releases</Label>
                               </div>
                             </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
                                 <Button 
-                                  variant="ghost" 
-                                  size="icon"
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => openDetailView(anime)}
+                                  className="hidden md:flex"
+                                >
+                                  <Eye className="h-4 w-4 mr-1" /> View
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
                                   onClick={() => openEditDialog(anime)}
                                 >
-                                  <Edit className="h-4 w-4" />
+                                  <Edit className="h-4 w-4 md:mr-1" /> <span className="hidden md:inline">Edit</span>
                                 </Button>
                               </div>
                             </TableCell>
@@ -528,17 +583,22 @@ const Admin = () => {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Are you sure?</DialogTitle>
+            <DialogTitle className="text-destructive">Delete Anime</DialogTitle>
           </DialogHeader>
-          <p>
-            Are you sure you want to delete "{selectedAnime?.title}"? This action cannot be undone.
-          </p>
+          <div className="py-3">
+            <p className="mb-2">
+              Are you sure you want to delete <strong>"{selectedAnime?.title}"</strong>?
+            </p>
+            <p className="text-sm text-muted-foreground">
+              This action cannot be undone and will remove all associated data including download links.
+            </p>
+          </div>
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDeleteAnime}>
-              Delete
+              <Trash2 className="h-4 w-4 mr-2" /> Delete
             </Button>
           </div>
         </DialogContent>
