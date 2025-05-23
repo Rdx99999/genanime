@@ -34,7 +34,7 @@ const VideoPlayer = () => {
   const [watchProgress, setWatchProgress] = useState<Record<string, number>>({});
   
   // Real-time stats
-  const [downloadSpeed, setDownloadSpeed] = useState(0);
+  const [streamingHealth, setStreamingHealth] = useState('Excellent');
   const [bufferHealth, setBufferHealth] = useState(0);
   const [networkStats, setNetworkStats] = useState({
     bytesReceived: 0,
@@ -155,7 +155,7 @@ const VideoPlayer = () => {
         });
 
         // Real video element stats using multiple browser APIs
-        const videoElement = document.querySelector('video');
+        const videoEl = document.querySelector('video');
         let realVideoStats = {
           resolution: '720p',
           fps: 30,
@@ -298,8 +298,30 @@ const VideoPlayer = () => {
         // Ensure received doesn't exceed total
         realBytesReceived = Math.min(realBytesReceived, realTotalBytes);
 
+        // Calculate real streaming health based on multiple factors
+        let healthScore = 'Excellent';
+        const videoElement = document.querySelector('video');
+        
+        if (videoElement) {
+          let score = 100;
+          
+          // Reduce score based on real metrics
+          if (realVideoStats.droppedFrames > 5) score -= 30;
+          if (bufferHealth < 30) score -= 25;
+          if (latency > 100) score -= 20;
+          if (videoElement.readyState < 3) score -= 15;
+          if (realDownloadSpeed < 1) score -= 10;
+          
+          // Determine health status from real data
+          if (score >= 85) healthScore = 'Excellent';
+          else if (score >= 70) healthScore = 'Good';
+          else if (score >= 50) healthScore = 'Fair';
+          else if (score >= 30) healthScore = 'Poor';
+          else healthScore = 'Critical';
+        }
+
         // Update with real measurements
-        setDownloadSpeed(realDownloadSpeed);
+        setStreamingHealth(healthScore);
         setNetworkStats({
           bytesReceived: realBytesReceived,
           totalBytes: realTotalBytes,
@@ -311,7 +333,8 @@ const VideoPlayer = () => {
         // Fallback to connection-based estimates only if real data fails
         const connection = (navigator as any).connection;
         if (connection && connection.downlink) {
-          setDownloadSpeed(connection.downlink);
+          // Set basic streaming health for fallback
+          setStreamingHealth(connection.downlink > 2 ? 'Good' : 'Fair');
         }
       }
     };
@@ -491,9 +514,17 @@ const VideoPlayer = () => {
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 <div className="bg-background rounded-lg p-3 border">
-                  <div className="text-sm text-muted-foreground">Download Speed</div>
-                  <div className="text-lg font-bold text-primary">
-                    {downloadSpeed.toFixed(1)} MB/s
+                  <div className="text-sm text-muted-foreground">Streaming Health</div>
+                  <div className="text-lg font-bold">
+                    <span className={
+                      streamingHealth === 'Excellent' ? 'text-green-500' :
+                      streamingHealth === 'Good' ? 'text-blue-500' :
+                      streamingHealth === 'Fair' ? 'text-yellow-500' :
+                      streamingHealth === 'Poor' ? 'text-orange-500' :
+                      'text-red-500'
+                    }>
+                      {streamingHealth}
+                    </span>
                   </div>
                 </div>
                 
