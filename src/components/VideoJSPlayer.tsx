@@ -32,7 +32,7 @@ const VideoJSPlayer = ({
         controls: true,
         responsive: true,
         fluid: true,
-        autoplay: 'muted',
+        autoplay: true,
         preload: 'auto',
         playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
         plugins: {

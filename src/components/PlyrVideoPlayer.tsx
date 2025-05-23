@@ -96,7 +96,7 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
               key: 'plyr' 
             },
             autoplay: true,
-            muted: true
+            muted: false
           };
 
           playerRef.current = new (window as any).Plyr(videoRef.current, plyrOptions);

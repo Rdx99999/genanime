@@ -180,7 +180,6 @@ const AdvancedVideoPlayer = ({
         playsInline
         webkit-playsinline="true"
         autoPlay
-        muted
       />
       
       {/* Controls Overlay */}
