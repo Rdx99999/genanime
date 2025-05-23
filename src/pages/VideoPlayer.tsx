@@ -31,6 +31,8 @@ const VideoPlayer = () => {
   const [episodeLinks, setEpisodeLinks] = useState<Record<string, DownloadLink[]>>({});
   const [episodeSearch, setEpisodeSearch] = useState<string>("");
   const [watchProgress, setWatchProgress] = useState<Record<string, number>>({});
+  const [volume, setVolume] = useState<number>(100);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
   const videoRef = useState<HTMLVideoElement | null>(null);
 
   useEffect(() => {
@@ -179,36 +181,143 @@ const VideoPlayer = () => {
             {/* Video Player */}
             <div className="aspect-video bg-black rounded-lg overflow-hidden relative shadow-xl border border-primary/20">
               {videoUrl ? (
-                <video
-                  ref={(el) => videoRef.current = el}
-                  src={videoUrl}
-                  controls
-                  autoPlay
-                  className="w-full h-full"
-                  controlsList="nodownload"
-                  onTimeUpdate={(e) => {
-                    const video = e.currentTarget;
-                    // Save progress every 5 seconds
-                    if (video.currentTime % 5 < 1 && video.currentTime > 0) {
-                      setWatchProgress(prev => ({
-                        ...prev,
-                        [currentEpisode]: video.currentTime
-                      }));
-                    }
-                  }}
-                  onLoadedData={(e) => {
-                    // Restore saved progress when video loads
-                    const savedTime = watchProgress[currentEpisode];
-                    if (savedTime && e.currentTarget) {
-                      // Only seek if the saved time is less than the total duration (to avoid seeking beyond the end)
-                      if (savedTime < e.currentTarget.duration - 10) {
-                        e.currentTarget.currentTime = savedTime;
+                <>
+                  <video
+                    ref={(el) => {
+                      videoRef.current = el;
+                      if (el) {
+                        el.volume = volume / 100;
+                        el.muted = isMuted;
                       }
-                    }
-                  }}
-                >
-                  Your browser does not support the video tag.
-                </video>
+                    }}
+                    src={videoUrl}
+                    controls
+                    autoPlay
+                    className="w-full h-full"
+                    controlsList="nodownload"
+                    onTimeUpdate={(e) => {
+                      const video = e.currentTarget;
+                      // Save progress every 5 seconds
+                      if (video.currentTime % 5 < 1 && video.currentTime > 0) {
+                        setWatchProgress(prev => ({
+                          ...prev,
+                          [currentEpisode]: video.currentTime
+                        }));
+                      }
+                    }}
+                    onLoadedData={(e) => {
+                      // Restore saved progress when video loads
+                      const savedTime = watchProgress[currentEpisode];
+                      if (savedTime && e.currentTarget) {
+                        // Only seek if the saved time is less than the total duration (to avoid seeking beyond the end)
+                        if (savedTime < e.currentTarget.duration - 10) {
+                          e.currentTarget.currentTime = savedTime;
+                        }
+                      }
+                    }}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                  
+                  {/* Custom Volume Control */}
+                  <div className="absolute bottom-16 right-4 bg-card border border-border shadow-lg rounded-lg p-3 flex flex-col gap-2 w-52 opacity-80 hover:opacity-100 transition-opacity">
+                    <div className="flex justify-between items-center mb-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => {
+                          setIsMuted(!isMuted);
+                          if (videoRef.current) {
+                            videoRef.current.muted = !isMuted;
+                          }
+                        }}
+                        className="h-8 w-8"
+                      >
+                        {isMuted ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"></path><line x1="23" x2="17" y1="9" y2="15"></line><line x1="17" x2="23" y1="9" y2="15"></line></svg>
+                        ) : volume > 50 ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                        ) : volume > 0 ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z"></path><line x1="23" x2="17" y1="9" y2="15"></line><line x1="17" x2="23" y1="9" y2="15"></line></svg>
+                        )}
+                      </Button>
+                      <p className="text-sm">{isMuted ? "Muted" : `Volume: ${volume}%`}</p>
+                    </div>
+                    <div className="w-full">
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        step="1"
+                        value={volume}
+                        onChange={(e) => {
+                          const newVolume = parseInt(e.target.value);
+                          setVolume(newVolume);
+                          if (videoRef.current) {
+                            videoRef.current.volume = newVolume / 100;
+                            if (newVolume === 0) {
+                              setIsMuted(true);
+                              videoRef.current.muted = true;
+                            } else if (isMuted) {
+                              setIsMuted(false);
+                              videoRef.current.muted = false;
+                            }
+                          }
+                        }}
+                        className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+                    <div className="flex justify-between mt-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => {
+                          setVolume(0);
+                          setIsMuted(true);
+                          if (videoRef.current) {
+                            videoRef.current.volume = 0;
+                            videoRef.current.muted = true;
+                          }
+                        }}
+                        className="text-xs h-6 px-2"
+                      >
+                        0%
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => {
+                          setVolume(50);
+                          setIsMuted(false);
+                          if (videoRef.current) {
+                            videoRef.current.volume = 0.5;
+                            videoRef.current.muted = false;
+                          }
+                        }}
+                        className="text-xs h-6 px-2"
+                      >
+                        50%
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => {
+                          setVolume(100);
+                          setIsMuted(false);
+                          if (videoRef.current) {
+                            videoRef.current.volume = 1;
+                            videoRef.current.muted = false;
+                          }
+                        }}
+                        className="text-xs h-6 px-2"
+                      >
+                        100%
+                      </Button>
+                    </div>
+                  </div>
+                </>
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <p className="text-muted-foreground">No video URL available</p>
