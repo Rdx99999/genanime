@@ -9,6 +9,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getAnimeById } from "@/lib/animeData";
 import { Anime, DownloadLink } from "@/types/anime";
+import { Input } from "@/components/ui/input";
 
 const VideoPlayer = () => {
   const [searchParams] = useSearchParams();
@@ -81,7 +82,9 @@ const VideoPlayer = () => {
   };
 
   const changeEpisode = (episode: string) => {
-    const episodeLinks = anime?.downloadLinks.filter(
+    if (!anime) return;
+    
+    const episodeLinks = anime.downloadLinks.filter(
       (link) => link.episodeNumber.toString() === episode
     ) || [];
 
@@ -104,7 +107,9 @@ const VideoPlayer = () => {
   };
 
   const changeQuality = (quality: string) => {
-    const episodeLinks = anime?.downloadLinks.filter(
+    if (!anime) return;
+    
+    const episodeLinks = anime.downloadLinks.filter(
       (link) => link.episodeNumber.toString() === currentEpisode && link.quality === quality
     ) || [];
 
@@ -119,6 +124,10 @@ const VideoPlayer = () => {
 
   // Get unique episode numbers
   const episodes = Object.keys(episodeLinks).sort((a, b) => parseInt(a) - parseInt(b));
+
+  const filteredEpisodes = episodes.filter(episode => 
+    episode.includes(episodeSearch)
+  );
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -176,24 +185,28 @@ const VideoPlayer = () => {
                 <h2 className="text-xl font-semibold mb-3">Episodes</h2>
                 <div className="bg-card rounded-lg p-4 border shadow-sm">
                   {Object.keys(episodeLinks).length > 0 ? (
-                    <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
-                      <h2 className="font-semibold mb-3 flex items-center">
-                        Episodes
-                      </h2>
-
+                    <div>
+                      <div className="mb-4">
+                        <Input
+                          type="text"
+                          placeholder="Search episodes..."
+                          value={episodeSearch}
+                          onChange={(e) => setEpisodeSearch(e.target.value)}
+                          className="w-full"
+                        />
+                      </div>
+                      
                       <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                        {episodes
-                          .filter(episode => episode.includes(episodeSearch))
-                          .map(episode => (
-                            <Button
-                              key={`episode-${episode}`}
-                              variant={currentEpisode === episode ? "default" : "outline"}
-                              className={`h-10 w-full ${currentEpisode === episode ? "bg-primary text-primary-foreground" : "hover:bg-primary/10"}`}
-                              onClick={() => changeEpisode(episode)}
-                            >
-                              {episode}
-                            </Button>
-                          ))}
+                        {filteredEpisodes.map(episode => (
+                          <Button
+                            key={`episode-${episode}`}
+                            variant={currentEpisode === episode ? "default" : "outline"}
+                            className={`h-10 w-full ${currentEpisode === episode ? "bg-primary text-primary-foreground" : "hover:bg-primary/10"}`}
+                            onClick={() => changeEpisode(episode)}
+                          >
+                            {episode}
+                          </Button>
+                        ))}
                       </div>
                     </div>
                   ) : (

@@ -85,7 +85,7 @@ const EpisodeDownloadList = ({ downloadLinks, episodeCount, animeId }: EpisodeDo
       ? links.find(link => link.quality === selectedQuality) || links[0] 
       : links[0];
       
-    navigate(`/video?url=${encodeURIComponent(linkToUse.url)}&episode=${episode}&quality=${linkToUse.quality}&title=${animeId || ''}`);
+    navigate(`/video?animeId=${animeId}&url=${encodeURIComponent(linkToUse.url)}&episode=${episode}&quality=${linkToUse.quality}`);
   };
   
   return (
