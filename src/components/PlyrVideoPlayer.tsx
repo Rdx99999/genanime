@@ -11,6 +11,8 @@ interface PlyrOptions {
   fullscreen?: { enabled: boolean; fallback: boolean; iosNative: boolean };
   storage?: { enabled: boolean; key: string };
   quality?: { default: string; options: string[] };
+  autoplay?: boolean;
+  muted?: boolean;
 }
 
 interface PlyrVideoPlayerProps {
@@ -92,7 +94,9 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
             storage: { 
               enabled: false, 
               key: 'plyr' 
-            }
+            },
+            autoplay: true,
+            muted: true
           };
 
           playerRef.current = new (window as any).Plyr(videoRef.current, plyrOptions);

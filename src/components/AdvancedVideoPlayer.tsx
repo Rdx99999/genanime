@@ -179,6 +179,8 @@ const AdvancedVideoPlayer = ({
         onTouchEnd={handleVideoTouch}
         playsInline
         webkit-playsinline="true"
+        autoPlay
+        muted
       />
       
       {/* Controls Overlay */}
@@ -295,7 +297,7 @@ const AdvancedVideoPlayer = ({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .slider::-webkit-slider-thumb {
           appearance: none;
           height: 12px;
