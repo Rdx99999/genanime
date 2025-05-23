@@ -106,6 +106,15 @@ const VideoJSPlayer = ({
         className="w-full h-full rounded-lg overflow-hidden"
         style={{ aspectRatio: '16/9' }}
       />
+      
+      <style>{`
+        @media (max-width: 767px) and (orientation: portrait) {
+          .vjs-mute-control,
+          .vjs-volume-panel {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };

@@ -209,6 +209,14 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
           transition: all 0.2s ease;
         }
         
+        /* Hide volume controls on mobile portrait mode */
+        @media (max-width: 767px) and (orientation: portrait) {
+          .plyr [data-plyr="mute"],
+          .plyr [data-plyr="volume"] {
+            display: none !important;
+          }
+        }
+        
         .plyr__control:hover {
           color: hsl(var(--primary));
           transform: scale(1.1);

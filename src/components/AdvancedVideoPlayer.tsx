@@ -238,7 +238,7 @@ const AdvancedVideoPlayer = ({
                 <SkipForward className="w-4 h-4" />
               </Button>
 
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 volume-controls">
                 <Button variant="ghost" size="sm" onClick={toggleMute} className="text-white hover:bg-white/20">
                   {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                 </Button>
@@ -313,6 +313,12 @@ const AdvancedVideoPlayer = ({
           background: #3b82f6;
           cursor: pointer;
           border: none;
+        }
+        
+        @media (max-width: 767px) and (orientation: portrait) {
+          .volume-controls {
+            display: none !important;
+          }
         }
       `}</style>
     </div>
