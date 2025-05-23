@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -13,11 +14,12 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import ReactPlayer from "react-player";
 
 const VideoPlayer = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const playerRef = useRef<ReactPlayer>(null);
   const [videoUrl, setVideoUrl] = useState<string>("");
   const [animeTitle, setAnimeTitle] = useState<string>("");
   const [episodeNumber, setEpisodeNumber] = useState<number>(1);
@@ -30,6 +32,8 @@ const VideoPlayer = () => {
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
   const [isPaused, setIsPaused] = useState<boolean>(true);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [hasStarted, setHasStarted] = useState<boolean>(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -37,6 +41,8 @@ const VideoPlayer = () => {
     const title = params.get("title");
     const episode = params.get("episode");
     const qualityParam = params.get("quality");
+
+    console.log("URL from params:", url);
 
     if (!url) {
       setError("No video URL provided");
@@ -68,57 +74,41 @@ const VideoPlayer = () => {
     setIsLoading(false);
   }, [location]);
 
-  // Handle video events
-  useEffect(() => {
-    const videoElement = videoRef.current;
-    if (!videoElement) return;
+  // Handle video playback
+  const handleProgress = (state: { played: number; playedSeconds: number; loaded: number; loadedSeconds: number }) => {
+    setCurrentTime(state.playedSeconds);
 
-    const handleTimeUpdate = () => {
-      setCurrentTime(videoElement.currentTime);
-
-      // Update watch history
-      if (videoElement.currentTime > 0) {
-        const historyKey = `${animeTitle}-ep${episodeNumber}`;
-        const newHistory = {...watchHistory, [historyKey]: videoElement.currentTime};
-        setWatchHistory(newHistory);
-        localStorage.setItem('animeWatchHistory', JSON.stringify(newHistory));
-      }
-    };
-
-    const handleLoadedMetadata = () => {
-      setDuration(videoElement.duration);
-      setIsLoading(false);
-
-      // Restore saved position
+    // Update watch history
+    if (state.playedSeconds > 0) {
       const historyKey = `${animeTitle}-ep${episodeNumber}`;
-      const savedTime = watchHistory[historyKey] || 0;
-      if (savedTime > 0) {
-        videoElement.currentTime = savedTime;
-      }
-    };
+      const newHistory = {...watchHistory, [historyKey]: state.playedSeconds};
+      setWatchHistory(newHistory);
+      localStorage.setItem('animeWatchHistory', JSON.stringify(newHistory));
+    }
+  };
 
-    const handlePlay = () => setIsPaused(false);
-    const handlePause = () => setIsPaused(true);
-    const handleEnded = () => {
-      if (episodeNumber < Math.max(...availableEpisodes)) {
-        handleEpisodeChange(episodeNumber + 1);
-      }
-    };
+  const handleDuration = (duration: number) => {
+    setDuration(duration);
+    setIsLoading(false);
 
-    videoElement.addEventListener('timeupdate', handleTimeUpdate);
-    videoElement.addEventListener('loadedmetadata', handleLoadedMetadata);
-    videoElement.addEventListener('play', handlePlay);
-    videoElement.addEventListener('pause', handlePause);
-    videoElement.addEventListener('ended', handleEnded);
+    // Restore saved position
+    const historyKey = `${animeTitle}-ep${episodeNumber}`;
+    const savedTime = watchHistory[historyKey] || 0;
+    if (savedTime > 0 && playerRef.current) {
+      playerRef.current.seekTo(savedTime, 'seconds');
+    }
+  };
 
-    return () => {
-      videoElement.removeEventListener('timeupdate', handleTimeUpdate);
-      videoElement.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      videoElement.removeEventListener('play', handlePlay);
-      videoElement.removeEventListener('pause', handlePause);
-      videoElement.removeEventListener('ended', handleEnded);
-    };
-  }, [videoRef.current, episodeNumber, animeTitle, watchHistory, availableEpisodes]);
+  const handleReady = () => {
+    setIsLoading(false);
+    setHasStarted(true);
+  };
+
+  const handleError = (error: any) => {
+    console.error("Video playback error:", error);
+    setIsLoading(false);
+    setError("Error loading video. Please try another quality or check your network connection.");
+  };
 
   const formatTime = (seconds: number): string => {
     if (isNaN(seconds)) return "00:00";
@@ -133,7 +123,7 @@ const VideoPlayer = () => {
     params.set('quality', newQuality);
     
     // Keep current video time
-    const currentVideoTime = videoRef.current?.currentTime || 0;
+    const currentVideoTime = currentTime;
     
     // Navigate to the updated URL
     navigate(`/video?${params.toString()}`);
@@ -143,8 +133,8 @@ const VideoPlayer = () => {
     
     // After video loads, restore playback position
     setTimeout(() => {
-      if (videoRef.current) {
-        videoRef.current.currentTime = currentVideoTime;
+      if (playerRef.current) {
+        playerRef.current.seekTo(currentVideoTime, 'seconds');
       }
     }, 500);
   };
@@ -175,17 +165,7 @@ const VideoPlayer = () => {
     }
   };
 
-  const togglePlayPause = () => {
-    if (!videoRef.current) return;
-
-    if (videoRef.current.paused) {
-      videoRef.current.play();
-    } else {
-      videoRef.current.pause();
-    }
-  };
-
-  if (isLoading) {
+  if (isLoading && !hasStarted) {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <Navbar />
@@ -239,43 +219,47 @@ const VideoPlayer = () => {
               </Badge>
             </div>
 
-            {videoUrl ? (
-              <div className="relative w-full h-full">
-                {videoUrl ? (
-                  <>
-                    <video
-                      ref={videoRef}
-                      src={videoUrl}
-                      className="w-full h-full"
-                      poster="https://images.unsplash.com/photo-1579547945413-497e1b99dac0?q=80&w=1000"
-                      controls
-                      autoPlay
-                      controlsList="nodownload"
-                      onLoadStart={() => setIsLoading(true)}
-                      onLoadedData={() => setIsLoading(false)}
-                      onError={() => {
-                        setIsLoading(false);
-                        setError("Error loading video. Please try another quality.");
-                      }}
-                    ></video>
+            <div className="relative w-full h-full">
+              {videoUrl ? (
+                <div className="relative w-full h-full">
+                  <ReactPlayer
+                    ref={playerRef}
+                    url={videoUrl}
+                    width="100%"
+                    height="100%"
+                    controls={true}
+                    playing={isPlaying}
+                    onPlay={() => setIsPlaying(true)}
+                    onPause={() => setIsPlaying(false)}
+                    onProgress={handleProgress}
+                    onDuration={handleDuration}
+                    onReady={handleReady}
+                    onError={handleError}
+                    onBuffer={() => setIsLoading(true)}
+                    onBufferEnd={() => setIsLoading(false)}
+                    config={{
+                      file: {
+                        attributes: {
+                          controlsList: 'nodownload',
+                          poster: "https://images.unsplash.com/photo-1579547945413-497e1b99dac0?q=80&w=1000"
+                        }
+                      }
+                    }}
+                    style={{ backgroundColor: '#000' }}
+                  />
 
-                    {isLoading && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-10">
-                        <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full"></div>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black text-white">
-                    Video URL not provided
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-black">
-                <p className="text-white">No video source available</p>
-              </div>
-            )}
+                  {isLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-10">
+                      <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full"></div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-black text-white">
+                  Video URL not provided
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
