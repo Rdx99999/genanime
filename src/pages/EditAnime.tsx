@@ -2,12 +2,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Save, FileEdit } from "lucide-react";
 import AnimeForm from "@/components/AnimeForm";
 import AdminNavbar from "@/components/AdminNavbar";
 import { Anime } from "@/types/anime";
 import { getAnimeById, updateAnime } from "@/lib/animeData";
 import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "framer-motion";
 
 const EditAnime = () => {
   const { id } = useParams<{ id: string }>();
@@ -70,42 +72,101 @@ const EditAnime = () => {
   return (
     <div className="min-h-screen bg-background">
       <AdminNavbar />
-      <div className="container mx-auto py-6 px-4">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/admin")}
-          className="mb-4"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Admin
-        </Button>
-        
-        <h1 className="text-2xl font-bold mb-6">Edit Anime</h1>
+      
+      <main className="container mx-auto py-6 px-4">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigate("/admin")}
+              className="h-9 w-9 rounded-full"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">Edit Anime</h1>
+              <p className="text-muted-foreground text-sm">Update anime details and episodes</p>
+            </div>
+          </div>
+          
+          {!isLoading && anime && (
+            <Button 
+              type="submit"
+              form="anime-edit-form"
+              disabled={isSubmitting}
+              className="flex items-center gap-2"
+            >
+              {isSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              Save Changes
+            </Button>
+          )}
+        </div>
         
         {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
-            <span>Loading anime data...</span>
-          </div>
+          <Card className="w-full">
+            <CardContent className="flex flex-col items-center justify-center py-10">
+              <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">Loading anime data...</p>
+            </CardContent>
+          </Card>
         ) : error ? (
-          <div className="text-center py-10">
-            <p className="text-destructive mb-4">{error}</p>
-            <Button onClick={() => navigate("/admin")}>Go Back</Button>
-          </div>
+          <Card className="w-full border-destructive/50">
+            <CardContent className="flex flex-col items-center justify-center py-10">
+              <div className="rounded-full bg-destructive/10 p-3 mb-4">
+                <FileEdit className="h-6 w-6 text-destructive" />
+              </div>
+              <h2 className="text-xl font-semibold mb-2">{error}</h2>
+              <p className="text-muted-foreground mb-4">Unable to load the anime data. Please try again.</p>
+              <Button onClick={() => navigate("/admin")}>Return to Admin Dashboard</Button>
+            </CardContent>
+          </Card>
         ) : anime ? (
-          <div className="bg-card rounded-lg border p-6">
-            <AnimeForm 
-              initialData={anime} 
-              onSubmit={handleUpdateAnime} 
-              isEditing={true}
-            />
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Card className="border bg-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-xl">
+                  <span className="flex items-center gap-2">
+                    <FileEdit className="h-5 w-5 text-primary" />
+                    Editing: {anime.title}
+                  </span>
+                </CardTitle>
+                <CardDescription>
+                  Make changes to the anime details and episode links below
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AnimeForm 
+                  id="anime-edit-form"
+                  initialData={anime} 
+                  onSubmit={handleUpdateAnime} 
+                  isEditing={true}
+                  isSubmitting={isSubmitting}
+                />
+              </CardContent>
+            </Card>
+          </motion.div>
         ) : (
-          <div className="text-center py-10">
-            <p className="text-destructive mb-4">Anime not found</p>
-            <Button onClick={() => navigate("/admin")}>Go Back</Button>
-          </div>
+          <Card className="w-full border-destructive/50">
+            <CardContent className="flex flex-col items-center justify-center py-10">
+              <div className="rounded-full bg-destructive/10 p-3 mb-4">
+                <FileEdit className="h-6 w-6 text-destructive" />
+              </div>
+              <h2 className="text-xl font-semibold mb-2">Anime Not Found</h2>
+              <p className="text-muted-foreground mb-4">We couldn't find the anime you're looking for.</p>
+              <Button onClick={() => navigate("/admin")}>Return to Admin Dashboard</Button>
+            </CardContent>
+          </Card>
         )}
-      </div>
+      </main>
     </div>
   );
 };

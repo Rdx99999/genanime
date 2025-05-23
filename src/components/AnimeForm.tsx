@@ -17,12 +17,14 @@ import { Trash2, Plus } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 
 interface AnimeFormProps {
+  id?: string;
   initialData?: Anime;
   onSubmit: (animeData: Omit<Anime, "id">) => void;
   isEditing?: boolean;
+  isSubmitting?: boolean;
 }
 
-const AnimeForm = ({ initialData, onSubmit, isEditing = false }: AnimeFormProps) => {
+const AnimeForm = ({ id, initialData, onSubmit, isEditing = false, isSubmitting = false }: AnimeFormProps) => {
   const [formData, setFormData] = useState<Omit<Anime, "id">>({
     title: initialData?.title || "",
     description: initialData?.description || "",
@@ -98,7 +100,7 @@ const AnimeForm = ({ initialData, onSubmit, isEditing = false }: AnimeFormProps)
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form id={id} onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
@@ -259,11 +261,13 @@ const AnimeForm = ({ initialData, onSubmit, isEditing = false }: AnimeFormProps)
         </div>
       </div>
       
-      <div className="flex justify-end">
-        <Button type="submit">
-          {isEditing ? "Update Anime" : "Create Anime"}
-        </Button>
-      </div>
+      {!id && (
+        <div className="flex justify-end">
+          <Button type="submit" disabled={isSubmitting}>
+            {isEditing ? "Update Anime" : "Create Anime"}
+          </Button>
+        </div>
+      )}
     </form>
   );
 };
