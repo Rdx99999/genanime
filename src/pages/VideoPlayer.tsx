@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -174,29 +175,11 @@ const VideoPlayer = () => {
               <div>
                 <h2 className="text-xl font-semibold mb-3">Episodes</h2>
                 <div className="bg-card rounded-lg p-4 border shadow-sm">
-                  {Object.keys(episodeLinks).length > 0 && (
+                  {Object.keys(episodeLinks).length > 0 ? (
                     <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
                       <h2 className="font-semibold mb-3 flex items-center">
-                        {/*<List className="h-5 w-5 mr-2 text-primary" />*/}
                         Episodes
                       </h2>
-
-                      {/* Episode Search */}
-                      {/*<div className="relative mb-3">
-                        <Input
-                          type="text"
-                          placeholder="Search episode..."
-                          className="pl-10"
-                          value={episodeSearch}
-                          onChange={(e) => setEpisodeSearch(e.target.value)}
-                        />
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <path d="m21 21-4.3-4.3"></path>
-                          </svg>
-                        </div>
-                      </div>*/}
 
                       <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
                         {episodes
