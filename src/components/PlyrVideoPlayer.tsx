@@ -227,20 +227,41 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
         }
         
         .plyr__menu__container {
-          background: hsl(var(--background) / 0.95);
-          border: 1px solid hsl(var(--border));
-          border-radius: 12px;
+          background: rgba(0, 0, 0, 0.85);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
           backdrop-filter: blur(12px);
           box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+          right: 5px !important; /* Position to right side */
+          width: auto !important;
+          min-width: 60px;
+          padding: 4px;
         }
         
         .plyr__menu__container .plyr__control {
-          color: hsl(var(--foreground));
+          color: white;
+          font-size: 14px;
+          text-align: center;
+          padding: 8px;
+        }
+        
+        .plyr__menu__container .plyr__control--back {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.8);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          margin-bottom: 5px;
         }
         
         .plyr__menu__container .plyr__control:hover {
-          background: hsl(var(--accent));
-          color: hsl(var(--accent-foreground));
+          background: hsl(var(--primary));
+          color: white;
+        }
+        
+        .plyr__menu__container .plyr__menu__value {
+          width: auto;
+          min-width: auto;
+          padding: 2px 4px;
+          border-radius: 3px;
         }
         
         .plyr__progress input[type=range] {
@@ -301,6 +322,22 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
           
           .plyr__tooltip {
             font-size: 11px;
+          }
+          
+          /* Custom style for playback rate menu on mobile */
+          .plyr__menu__container {
+            background: rgba(0, 0, 0, 0.9);
+            right: 0px !important;
+            top: -160px !important;
+            width: 100px !important;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+          }
+          
+          /* Make touch targets larger on mobile */
+          .plyr__menu__container .plyr__control {
+            padding: 10px;
+            margin: 2px 0;
           }
         }
         
