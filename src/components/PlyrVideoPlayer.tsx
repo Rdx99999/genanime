@@ -209,10 +209,11 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
           transition: all 0.2s ease;
         }
 
-        /* Hide volume controls on mobile portrait mode */
+        /* Hide volume controls and playback speed in mobile portrait mode */
         @media (max-width: 767px) and (orientation: portrait) {
           .plyr [data-plyr="mute"],
-          .plyr [data-plyr="volume"] {
+          .plyr [data-plyr="volume"],
+          .plyr [data-plyr="settings"] {
             display: none !important;
           }
         }
