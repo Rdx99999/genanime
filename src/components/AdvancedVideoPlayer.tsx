@@ -27,12 +27,17 @@ const AdvancedVideoPlayer = ({
   const [showControls, setShowControls] = useState(true);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSettings, setShowSettings] = useState(false);
+  const [lastTap, setLastTap] = useState(0);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   const playbackRates = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    // Detect touch device
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
     const handleLoadedData = () => {
       setDuration(video.duration);
@@ -138,6 +143,31 @@ const AdvancedVideoPlayer = ({
     setShowSettings(false);
   };
 
+  // Touch screen optimizations
+  const handleVideoTouch = (e: React.TouchEvent) => {
+    const currentTime = Date.now();
+    const tapDelay = currentTime - lastTap;
+
+    if (tapDelay < 300 && tapDelay > 0) {
+      // Double tap detected
+      toggleFullscreen();
+    } else {
+      // Single tap - toggle controls
+      setShowControls(!showControls);
+      // Auto-hide controls after 3 seconds on touch devices
+      if (isTouchDevice) {
+        setTimeout(() => setShowControls(false), 3000);
+      }
+    }
+    setLastTap(currentTime);
+  };
+
+  const handleVideoClick = (e: React.MouseEvent) => {
+    if (!isTouchDevice) {
+      togglePlay();
+    }
+  };
+
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -156,7 +186,10 @@ const AdvancedVideoPlayer = ({
         ref={videoRef}
         src={src}
         className="w-full h-full"
-        onClick={togglePlay}
+        onClick={handleVideoClick}
+        onTouchEnd={handleVideoTouch}
+        playsInline
+        webkit-playsinline="true"
       />
       
       {/* Controls Overlay */}
@@ -165,15 +198,21 @@ const AdvancedVideoPlayer = ({
           showControls ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        {/* Play/Pause Button Center */}
+        {/* Play/Pause Button Center - Larger on touch devices */}
         <div className="absolute inset-0 flex items-center justify-center">
           <Button
             variant="ghost"
             size="lg"
             onClick={togglePlay}
-            className="w-16 h-16 rounded-full bg-black/50 hover:bg-black/70 text-white"
+            className={`rounded-full bg-black/50 hover:bg-black/70 text-white ${
+              isTouchDevice ? 'w-20 h-20' : 'w-16 h-16'
+            }`}
           >
-            {isPlaying ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8 ml-1" />}
+            {isPlaying ? (
+              <Pause className={isTouchDevice ? "w-10 h-10" : "w-8 h-8"} />
+            ) : (
+              <Play className={isTouchDevice ? "w-10 h-10 ml-1" : "w-8 h-8 ml-1"} />
+            )}
           </Button>
         </div>
 
