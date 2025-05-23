@@ -63,7 +63,7 @@ const AnimeCard = ({ anime, onClick }: AnimeCardProps) => {
                 className="mb-2"
               >
                 <button className="w-full bg-primary hover:bg-primary/90 text-white py-2 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-colors">
-                  <Download className="h-4 w-4" /> Download Now
+                  <Play className="h-4 w-4" /> Watch Now
                 </button>
               </motion.div>
             </motion.div>
