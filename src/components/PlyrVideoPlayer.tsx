@@ -233,9 +233,11 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
           backdrop-filter: blur(12px);
           box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
           width: auto !important;
-          min-width: 60px;
-          padding: 4px;
-          z-index: 30;
+          min-width: 160px;
+          padding: 6px;
+          z-index: 9999;
+          /* Ensure items are fully visible */
+          overflow: visible !important;
         }
 
         /* Position menu properly in different modes */
@@ -252,6 +254,42 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
             transform: translateX(-50%) !important;
             bottom: 60px !important;
             top: auto !important;
+            width: 200px !important;
+            max-height: 300px !important;
+            overflow-y: auto !important;
+            background: rgba(0, 0, 0, 0.95) !important;
+          }
+          
+          /* Make the back button more visible */
+          .plyr__menu__container .plyr__control--back {
+            padding: 10px !important;
+            margin-bottom: 8px !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+          }
+          
+          /* Make menu items better for touch */
+          .plyr__menu__container .plyr__control,
+          .plyr__menu__container [role="menuitem"] {
+            padding: 12px !important;
+            margin: 4px 0 !important;
+            font-size: 16px !important;
+            display: block !important;
+            width: 100% !important;
+            text-align: left !important;
+            line-height: 1.5 !important;
+          }
+          
+          /* Highlight selected item with accent color */
+          .plyr__menu__container [role="menuitemradio"][aria-checked=true] {
+            background: rgba(255, 0, 0, 0.2) !important;
+            color: hsl(var(--primary)) !important;
+          }
+          
+          /* Make sure the speed values are visible */
+          .plyr__menu__container [role="menuitemradio"] .plyr__menu__value {
+            display: inline-block !important;
+            padding-left: 10px !important;
+            color: rgba(255, 255, 255, 0.8) !important;
           }
         }
 
@@ -345,18 +383,33 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
 
           /* Custom style for playback rate menu on mobile portrait */
           .plyr__menu__container {
-            background: rgba(0, 0, 0, 0.9);
-            width: 140px !important;
+            background: rgba(0, 0, 0, 0.95);
+            width: 200px !important;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 8px;
+            padding: 10px;
+            z-index: 9999 !important;
+            /* Improved visibility with shadow */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
           }
 
           /* Make touch targets larger on mobile portrait */
           .plyr__menu__container .plyr__control {
-            padding: 12px;
-            margin: 4px 0;
+            padding: 14px;
+            margin: 5px 0;
             font-size: 16px;
+            border-radius: 8px;
+          }
+          
+          /* Ensure menu is high enough in the z-index stack */
+          .plyr__menu__container {
+            z-index: 9999 !important;
+          }
+          
+          /* Make sure all menu options are visible by setting a max height and scroll */
+          .plyr__menu__container [role="menu"] {
+            max-height: 300px;
+            overflow-y: auto;
           }
 
           /* Position the time display for better visibility */
