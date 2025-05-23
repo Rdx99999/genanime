@@ -105,7 +105,7 @@ const VideoPlayer = () => {
           }
         });
 
-        // Real video element stats
+        // Real video element stats and network data
         const videoElement = document.querySelector('video');
         let realVideoStats = {
           resolution: currentQuality || '720p',
@@ -115,10 +115,47 @@ const VideoPlayer = () => {
           droppedFrames: 0
         };
 
+        // Real network data transfer calculation
+        let videoDataReceived = 0;
+        let totalNetworkData = 0;
+        
+        // Get actual video network stats
+        if (videoElement && (videoElement as any).webkitVideoDecodedByteCount) {
+          videoDataReceived = (videoElement as any).webkitVideoDecodedByteCount;
+        }
+
+        // Real dropped frames calculation
+        if (videoElement && (videoElement as any).getVideoPlaybackQuality) {
+          const playbackQuality = (videoElement as any).getVideoPlaybackQuality();
+          realVideoStats.droppedFrames = playbackQuality.droppedVideoFrames || 0;
+          if (playbackQuality.totalVideoFrames) {
+            realVideoStats.fps = Math.round(playbackQuality.totalVideoFrames / (videoElement.currentTime || 1));
+          }
+        }
+
         if (videoElement) {
-          // Get real video dimensions
+          // Get real video dimensions and codec
           if (videoElement.videoWidth && videoElement.videoHeight) {
             realVideoStats.resolution = `${videoElement.videoWidth}x${videoElement.videoHeight}`;
+          }
+
+          // Try to get real codec information
+          if ((videoElement as any).captureStream) {
+            try {
+              const stream = (videoElement as any).captureStream();
+              const tracks = stream.getVideoTracks();
+              if (tracks.length > 0) {
+                const settings = tracks[0].getSettings();
+                if (settings.width && settings.height) {
+                  realVideoStats.resolution = `${settings.width}x${settings.height}`;
+                }
+                if (settings.frameRate) {
+                  realVideoStats.fps = Math.round(settings.frameRate);
+                }
+              }
+            } catch (e) {
+              // Fallback to standard detection
+            }
           }
           
           // Real buffer health calculation
@@ -133,23 +170,50 @@ const VideoPlayer = () => {
               }
             }
           }
-          const bufferHealthPercent = Math.min(100, (bufferAhead / 30) * 100); // 30 seconds = 100%
+          const bufferHealthPercent = Math.min(100, (bufferAhead / 30) * 100);
           setBufferHealth(bufferHealthPercent);
 
-          // Real network quality assessment
-          if (videoElement.readyState >= 2) { // HAVE_CURRENT_DATA
-            const quality = videoElement.readyState === 4 ? 'excellent' : 'good';
-            setVideoStats(realVideoStats);
+          // Calculate real bitrate from actual playback
+          if (videoElement.currentTime > 0) {
+            const estimatedBitrate = (totalTransferSize * 8) / videoElement.currentTime / 1000; // kbps
+            if (estimatedBitrate > 0) {
+              realVideoStats.bitrate = Math.round(estimatedBitrate);
+            }
           }
+
+          setVideoStats(realVideoStats);
+        }
+
+        // Calculate real network transfer data
+        let realBytesReceived = totalTransferSize;
+        let realTotalBytes = totalTransferSize;
+
+        // Get video-specific network data if available
+        if (videoDataReceived > 0) {
+          realBytesReceived = videoDataReceived;
+        }
+
+        // Add up all network resources for more accurate total
+        const allResources = performance.getEntriesByType('resource');
+        let accumulatedTransfer = 0;
+        allResources.forEach((entry: any) => {
+          if (entry.transferSize && entry.name.includes('video') || entry.name.includes('.mp4') || entry.name.includes('stream')) {
+            accumulatedTransfer += entry.transferSize;
+          }
+        });
+
+        if (accumulatedTransfer > 0) {
+          realTotalBytes = accumulatedTransfer;
+          realBytesReceived = Math.min(realBytesReceived, accumulatedTransfer);
         }
 
         // Update with real measurements
         setDownloadSpeed(realDownloadSpeed);
-        setNetworkStats(prev => ({
-          bytesReceived: totalTransferSize,
-          totalBytes: totalTransferSize,
+        setNetworkStats({
+          bytesReceived: realBytesReceived,
+          totalBytes: realTotalBytes,
           latency: latency
-        }));
+        });
 
       } catch (error) {
         console.log('Performance measurement unavailable');
