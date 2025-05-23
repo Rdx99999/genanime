@@ -196,12 +196,36 @@ const VideoPlayer = () => {
 
           // Real dropped frames from Video Playback Quality API
           if ((videoElement as any).getVideoPlaybackQuality) {
-            const playbackQuality = (videoElement as any).getVideoPlaybackQuality();
-            realVideoStats.droppedFrames = playbackQuality.droppedVideoFrames || 0;
-            
-            // Real FPS calculation
-            if (playbackQuality.totalVideoFrames && videoElement.currentTime > 0) {
-              realVideoStats.fps = Math.round(playbackQuality.totalVideoFrames / videoElement.currentTime);
+            try {
+              const playbackQuality = (videoElement as any).getVideoPlaybackQuality();
+              // Get REAL dropped frames from browser API
+              realVideoStats.droppedFrames = playbackQuality.droppedVideoFrames || 0;
+              
+              // Real FPS calculation from actual video playback
+              if (playbackQuality.totalVideoFrames && videoElement.currentTime > 0) {
+                realVideoStats.fps = Math.round(playbackQuality.totalVideoFrames / videoElement.currentTime);
+              }
+              
+              // Additional real metrics if available
+              if (playbackQuality.corruptedVideoFrames) {
+                // Could add corrupted frames to dropped count for accuracy
+                realVideoStats.droppedFrames += playbackQuality.corruptedVideoFrames;
+              }
+            } catch (e) {
+              // Fallback: check for frame drops using other APIs
+              if ((videoElement as any).webkitDroppedFrameCount) {
+                realVideoStats.droppedFrames = (videoElement as any).webkitDroppedFrameCount;
+              }
+            }
+          } else {
+            // Alternative real dropped frame detection
+            if ((videoElement as any).webkitDroppedFrameCount !== undefined) {
+              realVideoStats.droppedFrames = (videoElement as any).webkitDroppedFrameCount;
+            } else if ((videoElement as any).mozPresentedFrames && (videoElement as any).mozPaintedFrames) {
+              // Firefox alternative
+              const presented = (videoElement as any).mozPresentedFrames;
+              const painted = (videoElement as any).mozPaintedFrames;
+              realVideoStats.droppedFrames = Math.max(0, presented - painted);
             }
           }
 
