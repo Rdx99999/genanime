@@ -235,28 +235,44 @@ const VideoPlayer = () => {
           setVideoStats(realVideoStats);
         }
 
-        // Calculate real network transfer data
-        let realBytesReceived = totalTransferSize;
-        let realTotalBytes = totalTransferSize;
+        // Calculate REAL network transfer data from browser APIs
+        let realBytesReceived = 0;
+        let realTotalBytes = 0;
 
-        // Get video-specific network data if available
-        if (videoDataReceived > 0) {
-          realBytesReceived = videoDataReceived;
-        }
-
-        // Add up all network resources for more accurate total
+        // Get ALL network resources from Performance API for accurate totals
         const allResources = performance.getEntriesByType('resource');
-        let accumulatedTransfer = 0;
+        let totalPageTransfer = 0;
+        let videoResourceTransfer = 0;
+        
         allResources.forEach((entry: any) => {
-          if (entry.transferSize && entry.name.includes('video') || entry.name.includes('.mp4') || entry.name.includes('stream')) {
-            accumulatedTransfer += entry.transferSize;
+          if (entry.transferSize) {
+            totalPageTransfer += entry.transferSize;
+            
+            // Track video-specific resources
+            if (entry.name.includes('video') || entry.name.includes('.mp4') || 
+                entry.name.includes('.webm') || entry.name.includes('stream') ||
+                entry.name.includes('blob:')) {
+              videoResourceTransfer += entry.transferSize;
+            }
           }
         });
 
-        if (accumulatedTransfer > 0) {
-          realTotalBytes = accumulatedTransfer;
-          realBytesReceived = Math.min(realBytesReceived, accumulatedTransfer);
+        // Use real video data if available from webkit APIs
+        if (videoDataReceived > 0) {
+          realBytesReceived = videoDataReceived;
+          realTotalBytes = Math.max(videoDataReceived, videoResourceTransfer);
+        } else if (videoResourceTransfer > 0) {
+          // Use video resource transfer as fallback
+          realBytesReceived = videoResourceTransfer;
+          realTotalBytes = videoResourceTransfer;
+        } else {
+          // Use total page transfer for general network activity
+          realBytesReceived = totalPageTransfer;
+          realTotalBytes = totalPageTransfer;
         }
+
+        // Ensure received doesn't exceed total
+        realBytesReceived = Math.min(realBytesReceived, realTotalBytes);
 
         // Update with real measurements
         setDownloadSpeed(realDownloadSpeed);
