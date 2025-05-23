@@ -10,7 +10,7 @@ import Footer from "@/components/Footer";
 import { getAnimeById } from "@/lib/animeData";
 import { Anime, DownloadLink } from "@/types/anime";
 import { Input } from "@/components/ui/input";
-import AdvancedVideoPlayer from "@/components/AdvancedVideoPlayer";
+import PlyrVideoPlayer from "@/components/PlyrVideoPlayer";
 
 const VideoPlayer = () => {
   const [searchParams] = useSearchParams();
@@ -179,7 +179,7 @@ const VideoPlayer = () => {
             {/* Advanced Video Player */}
             <div className="aspect-video bg-black rounded-lg overflow-hidden relative shadow-xl border border-primary/20">
               {videoUrl ? (
-                <AdvancedVideoPlayer
+                <PlyrVideoPlayer
                   src={videoUrl}
                   className="w-full h-full"
                 />
