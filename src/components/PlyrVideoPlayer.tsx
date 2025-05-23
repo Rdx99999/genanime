@@ -38,7 +38,7 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
         // Import Plyr JS
         const response = await fetch('https://cdn.plyr.io/3.7.8/plyr.polyfilled.js');
         const plyrJS = await response.text();
-        
+
         // Create and execute script
         const script = document.createElement('script');
         script.textContent = plyrJS;
@@ -154,7 +154,7 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
         playsInline
         crossOrigin="anonymous"
       />
-      
+
       <style>{`
         .plyr-video-container {
           --plyr-color-main: hsl(var(--primary));
@@ -169,16 +169,16 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
           --plyr-tooltip-background: hsl(var(--popover));
           --plyr-tooltip-color: hsl(var(--popover-foreground));
         }
-        
+
         .plyr {
           border-radius: 12px;
           overflow: hidden;
         }
-        
+
         .plyr--full-ui input[type=range] {
           color: hsl(var(--primary));
         }
-        
+
         .plyr__control--overlaid {
           background: hsl(var(--primary) / 0.9);
           border: 2px solid hsl(var(--primary));
@@ -187,13 +187,13 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
           transition: all 0.3s ease;
           backdrop-filter: blur(8px);
         }
-        
+
         .plyr__control--overlaid:hover {
           background: hsl(var(--primary));
           transform: scale(1.05);
           box-shadow: 0 8px 25px hsl(var(--primary) / 0.3);
         }
-        
+
         .plyr__controls {
           background: linear-gradient(
             transparent 0%,
@@ -203,12 +203,12 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
           padding: 20px;
           border-radius: 0 0 12px 12px;
         }
-        
+
         .plyr__control {
           color: white;
           transition: all 0.2s ease;
         }
-        
+
         /* Hide volume controls on mobile portrait mode */
         @media (max-width: 767px) and (orientation: portrait) {
           .plyr [data-plyr="mute"],
@@ -216,16 +216,16 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
             display: none !important;
           }
         }
-        
+
         .plyr__control:hover {
           color: hsl(var(--primary));
           transform: scale(1.1);
         }
-        
+
         .plyr__control.plyr__tab-focus {
           box-shadow: 0 0 0 2px hsl(var(--primary));
         }
-        
+
         .plyr__menu__container {
           background: rgba(0, 0, 0, 0.85);
           border: 1px solid rgba(255, 255, 255, 0.1);
@@ -237,47 +237,59 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
           min-width: 60px;
           padding: 4px;
         }
-        
+
         .plyr__menu__container .plyr__control {
           color: white;
           font-size: 14px;
           text-align: center;
           padding: 8px;
         }
-        
+
         .plyr__menu__container .plyr__control--back {
           font-size: 12px;
           color: rgba(255, 255, 255, 0.8);
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
           margin-bottom: 5px;
         }
-        
+
         .plyr__menu__container .plyr__control:hover {
           background: hsl(var(--primary));
           color: white;
         }
-        
+
         .plyr__menu__container .plyr__menu__value {
           width: auto;
           min-width: auto;
           padding: 2px 4px;
           border-radius: 3px;
         }
-        
+
         .plyr__progress input[type=range] {
           color: hsl(var(--primary));
         }
-        
+
         .plyr__progress input[type=range]::-webkit-slider-thumb {
           background: hsl(var(--primary));
           border: 2px solid white;
           box-shadow: 0 4px 12px hsl(var(--primary) / 0.4);
         }
-        
+
         .plyr__volume input[type=range] {
           color: hsl(var(--primary));
         }
-        
+
+        .plyr__volume input[type=range]::-webkit-slider-track {
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 4px;
+        }
+
+        .plyr__volume input[type=range]::-webkit-slider-thumb {
+          background: hsl(var(--primary));
+          border: 2px solid white;
+          border-radius: 50%;
+          box-shadow: 0 2px 8px hsl(var(--primary) / 0.3);
+        }
+
         .plyr__tooltip {
           background: hsl(var(--popover));
           color: hsl(var(--popover-foreground));
@@ -286,12 +298,12 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
           font-size: 12px;
           padding: 4px 8px;
         }
-        
+
         .plyr__time {
           color: white;
           font-weight: 500;
         }
-        
+
         /* Dark theme specific adjustments */
         @media (prefers-color-scheme: dark) {
           .plyr__controls {
@@ -302,29 +314,29 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
             );
           }
         }
-        
+
         /* Mobile responsive design */
-        @media (max-width: 768px) {
+        @media (max-width: 768px) and (orientation: portrait) {
           .plyr__controls {
             padding: 16px;
           }
-          
+
           .plyr__control {
             padding: 12px;
             min-width: 44px;
             min-height: 44px;
           }
-          
+
           .plyr__control--overlaid {
             width: 64px;
             height: 64px;
           }
-          
+
           .plyr__tooltip {
             font-size: 11px;
           }
-          
-          /* Custom style for playback rate menu on mobile */
+
+          /* Custom style for playback rate menu on mobile portrait */
           .plyr__menu__container {
             background: rgba(0, 0, 0, 0.9);
             right: 0px !important;
@@ -333,27 +345,41 @@ const PlyrVideoPlayer = ({ src, className = "" }: PlyrVideoPlayerProps) => {
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.15);
           }
-          
+
           /* Make touch targets larger on mobile */
           .plyr__menu__container .plyr__control {
             padding: 10px;
             margin: 2px 0;
           }
         }
-        
+
+        /* Enhanced controller visibility */
+        .plyr__controls {
+          padding-top: 30px !important;
+        }
+
+        /* Hide specific elements in portrait mode */
+        .plyr__menu__container .plyr__control--back {
+          padding: 12px !important;
+          margin-bottom: 10px !important;
+          font-weight: 500 !important;
+        }
+
+        /* Position the time display for better visibility */
+
         /* Custom loading animation */
         .plyr__poster {
           background-size: cover;
           background-position: center;
           border-radius: 12px;
         }
-        
+
         /* Volume slider styling */
         .plyr__volume input[type=range]::-webkit-slider-track {
           background: rgba(255, 255, 255, 0.3);
           border-radius: 4px;
         }
-        
+
         .plyr__volume input[type=range]::-webkit-slider-thumb {
           background: hsl(var(--primary));
           border: 2px solid white;
