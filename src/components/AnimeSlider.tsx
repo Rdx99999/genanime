@@ -1,100 +1,82 @@
-import { useState, useRef, useEffect } from "react";
+
+import { useRef } from "react";
 import { Anime } from "@/types/anime";
-import AnimeCard from "./AnimeCard";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import AnimeCard from "@/components/AnimeCard";
 import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useNavigate } from "react-router-dom";
 
 interface AnimeSliderProps {
   title: string;
   description?: string;
   animes: Anime[];
-  onAnimeClick?: (anime: Anime) => void; // Keeping for backward compatibility
+  onAnimeClick: (anime: Anime) => void;
 }
 
 const AnimeSlider = ({ title, description, animes, onAnimeClick }: AnimeSliderProps) => {
-  const [scrollPosition, setScrollPosition] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  const navigate = useNavigate();
-
-  const handleScroll = (direction: "left" | "right") => {
-    const slider = sliderRef.current;
-    if (!slider) return;
-
-    const scrollAmount = direction === "left" ? -slider.clientWidth * 0.8 : slider.clientWidth * 0.8;
-    slider.scrollBy({ left: scrollAmount, behavior: "smooth" });
+  
+  const scroll = (direction: "left" | "right") => {
+    if (!sliderRef.current) return;
+    
+    const scrollAmount = isMobile ? 240 : 320;
+    const currentScroll = sliderRef.current.scrollLeft;
+    
+    sliderRef.current.scrollTo({
+      left: direction === "left" ? currentScroll - scrollAmount : currentScroll + scrollAmount,
+      behavior: "smooth"
+    });
   };
 
-  useEffect(() => {
-    const slider = sliderRef.current;
-    if (!slider) return;
-
-    const handleScrollEvent = () => {
-      setScrollPosition(slider.scrollLeft);
-    };
-
-    slider.addEventListener("scroll", handleScrollEvent);
-    return () => slider.removeEventListener("scroll", handleScrollEvent);
-  }, []);
-
-  const showLeftArrow = scrollPosition > 20;
-  const showRightArrow = sliderRef.current
-    ? scrollPosition < sliderRef.current.scrollWidth - sliderRef.current.clientWidth - 20
-    : true;
-
-    const handleAnimeClick = (anime: Anime) => {
-      // Navigate to anime details page instead of triggering popup
-      navigate(`/anime/${anime.id}`);
-    };
+  if (!animes || animes.length === 0) return null;
 
   return (
-    <div className="relative group">
-      <div className="flex items-baseline justify-between mb-2 sm:mb-4">
+    <div className="relative mb-8">
+      <div className="flex justify-between items-end mb-4">
         <div>
-          <h3 className="text-lg sm:text-xl font-bold">{title}</h3>
-          {description && <p className="text-xs sm:text-sm text-muted-foreground">{description}</p>}
+          <h2 className="text-xl md:text-2xl font-bold">{title}</h2>
+          {description && (
+            <p className="text-sm text-muted-foreground mt-1">{description}</p>
+          )}
+        </div>
+        
+        <div className="hidden md:flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="rounded-full h-8 w-8"
+            onClick={() => scroll("left")}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="rounded-full h-8 w-8"
+            onClick={() => scroll("right")}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
-      <div className="relative">
-        {showLeftArrow && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm rounded-full shadow-md opacity-90 hover:opacity-100"
-            onClick={() => handleScroll("left")}
-          >
-            <ChevronLeft className={isMobile ? "h-4 w-4" : "h-6 w-6"} />
-          </Button>
-        )}
-
-        <div
-          ref={sliderRef}
-          className="flex overflow-x-auto space-x-3 sm:space-x-4 pb-3 sm:pb-4 scrollbar-hide -mx-2 px-2 scroll-smooth"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
+      <div 
+        ref={sliderRef}
+        className="overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        <div className="flex gap-3 md:gap-4">
           {animes.map((anime) => (
             <div 
               key={anime.id} 
-              className="flex-shrink-0 w-[140px] xs:w-[160px] sm:w-[180px]"
+              className="flex-shrink-0 w-[160px] md:w-[200px]"
+              onClick={() => onAnimeClick(anime)}
             >
-              <AnimeCard anime={anime} onClick={() => handleAnimeClick(anime)} />
+              <AnimeCard anime={anime} />
             </div>
           ))}
         </div>
-
-        {showRightArrow && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur-sm rounded-full shadow-md opacity-90 hover:opacity-100"
-            onClick={() => handleScroll("right")}
-          >
-            <ChevronRight className={isMobile ? "h-4 w-4" : "h-6 w-6"} />
-          </Button>
-        )}
       </div>
     </div>
   );

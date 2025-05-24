@@ -15,10 +15,13 @@ const AnimeCard = ({ anime, onClick }: AnimeCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-
+  
   const handleClick = (e: React.MouseEvent) => {
-    // Always navigate to the anime details page
-    navigate(`/anime/${anime.id}`);
+    if (onClick) {
+      onClick(e);
+    } else {
+      navigate(`/anime/${anime.id}`);
+    }
   };
 
   return (
