@@ -74,6 +74,7 @@ const Admin = () => {
     episodes: "",
     buttonText: "Watch Now",
     buttonAction: "watch",
+    watchUrl: "",
     isActive: true,
     order: 1
   });
