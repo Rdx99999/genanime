@@ -17,9 +17,10 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Check, Edit, Plus, Search, Trash2, X, Loader2, Star, Clock, Info, Eye } from "lucide-react";
+import { Check, Edit, Plus, Search, Trash2, X, Loader2, Star, Clock, Info, Eye, Image, ArrowUp, ArrowDown } from "lucide-react";
 import AdminNavbar from "@/components/AdminNavbar";
 import { Anime } from "@/types/anime";
+import { Banner } from "@/types/banner";
 import { 
   getAllAnimes, 
   getAnimeById, 
@@ -27,9 +28,19 @@ import {
   toggleAnimePopular, 
   toggleAnimeNewRelease 
 } from "@/lib/animeData";
+import { 
+  getAllBanners, 
+  createBanner, 
+  updateBanner, 
+  deleteBanner,
+  toggleBannerActive,
+  reorderBanners
+} from "@/lib/bannerData";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -47,10 +58,31 @@ const Admin = () => {
   const [popularAnimes, setPopularAnimes] = useState<Record<string, boolean>>({});
   const [newReleases, setNewReleases] = useState<Record<string, boolean>>({});
 
+  // Banner management state
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [selectedBanner, setSelectedBanner] = useState<Banner | null>(null);
+  const [isBannerDialogOpen, setIsBannerDialogOpen] = useState(false);
+  const [isBannerDeleteDialogOpen, setIsBannerDeleteDialogOpen] = useState(false);
+  const [isEditingBanner, setIsEditingBanner] = useState(false);
+  const [bannerForm, setBannerForm] = useState({
+    title: "",
+    subtitle: "",
+    description: "",
+    image: "",
+    color: "from-red-600/70 to-orange-600/30",
+    rating: "",
+    episodes: "",
+    buttonText: "Watch Now",
+    buttonAction: "watch",
+    isActive: true,
+    order: 1
+  });
+
   const { toast } = useToast();
 
   useEffect(() => {
     loadAnimes();
+    loadBanners();
   }, []);
 
   useEffect(() => {
@@ -111,6 +143,147 @@ const Admin = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const loadBanners = async () => {
+    try {
+      const data = await getAllBanners();
+      setBanners(data);
+    } catch (error) {
+      console.error("Error loading banners:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load banner data",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleCreateBanner = async () => {
+    try {
+      const bannerData = {
+        ...bannerForm,
+        episodes: bannerForm.episodes ? parseInt(bannerForm.episodes) : undefined,
+        order: banners.length + 1
+      };
+      await createBanner(bannerData);
+      await loadBanners();
+      setIsBannerDialogOpen(false);
+      resetBannerForm();
+      toast({
+        title: "Success",
+        description: "Banner created successfully"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create banner",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleUpdateBanner = async () => {
+    if (!selectedBanner) return;
+    try {
+      const bannerData = {
+        ...bannerForm,
+        episodes: bannerForm.episodes ? parseInt(bannerForm.episodes) : undefined
+      };
+      await updateBanner(selectedBanner.id, bannerData);
+      await loadBanners();
+      setIsBannerDialogOpen(false);
+      resetBannerForm();
+      toast({
+        title: "Success",
+        description: "Banner updated successfully"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update banner",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteBanner = async () => {
+    if (!selectedBanner) return;
+    try {
+      await deleteBanner(selectedBanner.id);
+      await loadBanners();
+      setIsBannerDeleteDialogOpen(false);
+      setSelectedBanner(null);
+      toast({
+        title: "Success",
+        description: "Banner deleted successfully"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete banner",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleToggleBannerActive = async (bannerId: string) => {
+    try {
+      await toggleBannerActive(bannerId);
+      await loadBanners();
+      toast({
+        title: "Success",
+        description: "Banner status updated"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update banner status",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const resetBannerForm = () => {
+    setBannerForm({
+      title: "",
+      subtitle: "",
+      description: "",
+      image: "",
+      color: "from-red-600/70 to-orange-600/30",
+      rating: "",
+      episodes: "",
+      buttonText: "Watch Now",
+      buttonAction: "watch",
+      isActive: true,
+      order: 1
+    });
+    setSelectedBanner(null);
+    setIsEditingBanner(false);
+  };
+
+  const openEditBanner = (banner: Banner) => {
+    setSelectedBanner(banner);
+    setBannerForm({
+      title: banner.title,
+      subtitle: banner.subtitle || "",
+      description: banner.description,
+      image: banner.image,
+      color: banner.color,
+      rating: banner.rating || "",
+      episodes: banner.episodes?.toString() || "",
+      buttonText: banner.buttonText || "Watch Now",
+      buttonAction: banner.buttonAction || "watch",
+      isActive: banner.isActive,
+      order: banner.order
+    });
+    setIsEditingBanner(true);
+    setIsBannerDialogOpen(true);
+  };
+
+  const openDeleteBanner = (banner: Banner) => {
+    setSelectedBanner(banner);
+    setIsBannerDeleteDialogOpen(true);
   };
 
   const handleDeleteAnime = async () => {
@@ -259,7 +432,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="all" className="flex items-center justify-center">
               <Info className="h-4 w-4 mr-2" /> All Anime 
               <Badge className="ml-2 bg-primary/20">{animes.length}</Badge>
@@ -274,6 +447,12 @@ const Admin = () => {
               <Clock className="h-4 w-4 mr-2" /> New Releases
               <Badge className="ml-2 bg-blue-500/20 text-blue-500">
                 {Object.values(newReleases).filter(Boolean).length}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="banners" className="flex items-center justify-center">
+              <Image className="h-4 w-4 mr-2" /> Banners
+              <Badge className="ml-2 bg-green-500/20 text-green-500">
+                {banners.length}
               </Badge>
             </TabsTrigger>
           </TabsList>
@@ -565,6 +744,122 @@ const Admin = () => {
                                   onClick={() => openEditDialog(anime)}
                                 >
                                   <Edit className="h-4 w-4 md:mr-1" /> <span className="hidden md:inline">Edit</span>
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="banners" className="mt-0">
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle className="text-xl">Banner Management</CardTitle>
+                    <CardDescription>
+                      Customize and manage homepage banners, hero sections, and promotional content
+                    </CardDescription>
+                  </div>
+                  <Button onClick={() => {
+                    resetBannerForm();
+                    setIsBannerDialogOpen(true);
+                  }}>
+                    <Plus className="h-4 w-4 mr-2" /> Add Banner
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {banners.length === 0 ? (
+                  <div className="text-center py-10">
+                    <Image className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground mb-4">No banners created yet</p>
+                    <Button onClick={() => {
+                      resetBannerForm();
+                      setIsBannerDialogOpen(true);
+                    }}>
+                      <Plus className="h-4 w-4 mr-2" /> Create Your First Banner
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Banner Preview</TableHead>
+                          <TableHead>Details</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Order</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {banners.map((banner) => (
+                          <TableRow key={banner.id}>
+                            <TableCell>
+                              <div className="flex items-center space-x-3">
+                                <div 
+                                  className="w-16 h-10 rounded bg-cover bg-center border"
+                                  style={{ backgroundImage: `url(${banner.image})` }}
+                                />
+                                <div>
+                                  <div className="font-medium">{banner.title}</div>
+                                  <div className="text-sm text-muted-foreground">{banner.subtitle}</div>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                <div className="text-muted-foreground">
+                                  {banner.description.length > 60 
+                                    ? `${banner.description.substring(0, 60)}...` 
+                                    : banner.description}
+                                </div>
+                                {banner.rating && (
+                                  <div className="flex items-center gap-1 mt-1">
+                                    <Star className="h-3 w-3 text-yellow-500" />
+                                    <span className="text-xs">{banner.rating}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center space-x-2">
+                                <Switch 
+                                  checked={banner.isActive}
+                                  onCheckedChange={() => handleToggleBannerActive(banner.id)}
+                                />
+                                <Label className="text-sm">
+                                  {banner.isActive ? "Active" : "Inactive"}
+                                </Label>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">#{banner.order}</Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => openEditBanner(banner)}
+                                >
+                                  <Edit className="h-4 w-4 md:mr-1" /> 
+                                  <span className="hidden md:inline">Edit</span>
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => openDeleteBanner(banner)}
+                                >
+                                  <Trash2 className="h-4 w-4 md:mr-1" /> 
+                                  <span className="hidden md:inline">Delete</span>
                                 </Button>
                               </div>
                             </TableCell>
