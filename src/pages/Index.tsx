@@ -18,8 +18,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const Index = () => {
   const [animes, setAnimes] = useState<Anime[]>([]);
   const [filteredAnimes, setFilteredAnimes] = useState<Anime[]>([]);
-  const [selectedAnime, setSelectedAnime] = useState<Anime | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  // Remove popup state variables
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -64,8 +64,7 @@ const Index = () => {
   };
 
   const openAnimeDetails = (anime: Anime) => {
-    setSelectedAnime(anime);
-    setIsDialogOpen(true);
+    navigate(`/anime/${anime.id}`);
   };
 
   return (
@@ -156,74 +155,7 @@ const Index = () => {
         )}
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={(open) => {
-        setIsDialogOpen(open);
-        if (!open) setSelectedAnime(null);
-      }}>
-        {selectedAnime && (
-          <DialogContent className="max-w-md sm:max-w-2xl md:max-w-4xl w-[95%] sm:w-[90%] h-[90vh] sm:h-[85vh] md:h-[80vh] max-h-[800px] overflow-hidden flex flex-col p-3 sm:p-6">
-            <DialogHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-2 space-y-2 sm:space-y-0">
-              <DialogTitle className="text-lg sm:text-xl md:text-2xl line-clamp-2">{selectedAnime.title}</DialogTitle>
-              <div className="flex flex-wrap gap-1">
-                {selectedAnime.genres?.map((genre) => (
-                  <Badge key={genre} variant="secondary" className="text-[10px] sm:text-xs">
-                    {genre}
-                  </Badge>
-                ))}
-              </div>
-            </DialogHeader>
-            <div className="flex-1 overflow-y-auto -mr-3 pr-3 sm:-mr-6 sm:pr-6">
-              <div className="grid grid-cols-1 sm:grid-cols-[minmax(120px,250px)_1fr] gap-3 sm:gap-4 md:gap-6">
-                <div className="relative aspect-[2/3] w-full max-w-[180px] sm:max-w-[250px] mx-auto sm:mx-0 bg-muted rounded-lg overflow-hidden">
-                  <img 
-                    src={selectedAnime.imageUrl} 
-                    alt={selectedAnime.title}
-                    className="object-cover w-full h-full"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="space-y-3 sm:space-y-4">
-                  <div>
-                    <h4 className="font-medium text-sm md:text-base mb-1 md:mb-2">Description</h4>
-                    <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
-                      {selectedAnime.description}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-3 sm:gap-4">
-                    {selectedAnime.releaseYear && (
-                      <div>
-                        <h4 className="font-medium text-xs sm:text-sm md:text-base mb-1">Year</h4>
-                        <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
-                          {selectedAnime.releaseYear}
-                        </p>
-                      </div>
-                    )}
-                    {selectedAnime.episodes && (
-                      <div>
-                        <h4 className="font-medium text-xs sm:text-sm md:text-base mb-1">Episodes</h4>
-                        <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
-                          {selectedAnime.episodes}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-sm md:text-base mb-1 md:mb-2">Watch or Download</h4>
-                    {selectedAnime.downloadLinks && selectedAnime.downloadLinks.length > 0 ? (
-                      <EpisodeDownloadList downloadLinks={selectedAnime.downloadLinks} />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-6 text-center">
-                        <Download className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground mb-3 opacity-50" />
-                        <p className="text-xs sm:text-sm text-muted-foreground">No episodes available</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        )}
-      </Dialog>
+      {/* Dialog removed - using full anime details page instead */}
 
       <Footer />
     </div>

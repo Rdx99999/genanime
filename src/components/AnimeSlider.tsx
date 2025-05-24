@@ -4,18 +4,20 @@ import AnimeCard from "./AnimeCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
 
 interface AnimeSliderProps {
   title: string;
   description?: string;
   animes: Anime[];
-  onAnimeClick: (anime: Anime) => void;
+  onAnimeClick?: (anime: Anime) => void; // Keeping for backward compatibility
 }
 
 const AnimeSlider = ({ title, description, animes, onAnimeClick }: AnimeSliderProps) => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   const handleScroll = (direction: "left" | "right") => {
     const slider = sliderRef.current;
@@ -41,6 +43,11 @@ const AnimeSlider = ({ title, description, animes, onAnimeClick }: AnimeSliderPr
   const showRightArrow = sliderRef.current
     ? scrollPosition < sliderRef.current.scrollWidth - sliderRef.current.clientWidth - 20
     : true;
+
+    const handleAnimeClick = (anime: Anime) => {
+      // Navigate to anime details page instead of triggering popup
+      navigate(`/anime/${anime.id}`);
+    };
 
   return (
     <div className="relative group">
@@ -73,7 +80,7 @@ const AnimeSlider = ({ title, description, animes, onAnimeClick }: AnimeSliderPr
               key={anime.id} 
               className="flex-shrink-0 w-[140px] xs:w-[160px] sm:w-[180px]"
             >
-              <AnimeCard anime={anime} onClick={() => onAnimeClick(anime)} />
+              <AnimeCard anime={anime} onClick={() => handleAnimeClick(anime)} />
             </div>
           ))}
         </div>

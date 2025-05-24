@@ -17,11 +17,8 @@ const AnimeCard = ({ anime, onClick }: AnimeCardProps) => {
   const navigate = useNavigate();
 
   const handleClick = (e: React.MouseEvent) => {
-    if (onClick) {
-      onClick(e);
-    } else {
-      navigate(`/anime/${anime.id}`);
-    }
+    // Always navigate to the anime details page
+    navigate(`/anime/${anime.id}`);
   };
 
   return (
