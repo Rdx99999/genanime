@@ -8,66 +8,33 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-
-// Sample banner data - you can replace this with actual data from your API
-const bannerData = [
-  {
-    id: 1,
-    title: "SOLO LEVELING",
-    subtitle: "Entertainment District Arc",
-    description:
-      "Tanjiro and his friends join the Sound Hashira Tengen Uzui on a mission in the Entertainment District.",
-    image:
-      "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/efaa210d-b55f-407c-bec4-101ae2d536cd/de3iif2-1ef9bdfd-043c-4586-ae57-829bd61cc4cc.png/v1/fill/w_1280,h_427,q_80,strp/solo_leveling_banner_by_godakutsu_de3iif2-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9NDI3IiwicGF0aCI6IlwvZlwvZWZhYTIxMGQtYjU1Zi00MDdjLWJlYzQtMTAxYWUyZDUzNmNkXC9kZTNpaWYyLTFlZjliZGZkLTA0M2MtNDU4Ni1hZTU3LTgyOWJkNjFjYzRjYy5wbmciLCJ3aWR0aCI6Ijw9MTI4MCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.pvdQB7bL4EhmLd4oKo3eS1u4fjyubbPS_YYKokRRDQM",
-    color: "from-red-600/70 to-orange-600/30",
-    rating: "9.2",
-    episodes: 24,
-  },
-  {
-    id: 2,
-    title: "Attack on Titan",
-    subtitle: "Final Season",
-    description:
-      "The fate of the world hangs in the balance as the final confrontation approaches.",
-    image:
-      "https://timelinecovers.pro/facebook-cover/download/anime-attack-on-titan-eren-and-levi-facebook-cover.jpg",
-    color: "from-blue-600/70 to-violet-600/30",
-    rating: "9.8",
-    episodes: 16,
-  },
-  {
-    id: 3,
-    title: "My Hero Academia",
-    subtitle: "Season 6",
-    description:
-      "Heroes and villains face off in a battle that will determine society's future.",
-    image:
-      "https://i.pinimg.com/736x/93/7b/f6/937bf6c10536aeb37843459743c3b9eb.jpg",
-    color: "from-green-600/70 to-emerald-600/30",
-    rating: "8.7",
-    episodes: 25,
-  },
-  {
-    id: 4,
-    title: "Jujutsu Kaisen",
-    subtitle: "Season 2",
-    description:
-      "Yuji Itadori and his friends battle against cursed spirits in this thrilling continuation.",
-    image: "https://wallpapercave.com/wp/wp13617586.jpg",
-    color: "from-purple-600/70 to-indigo-600/30",
-    rating: "9.5",
-    episodes: 23,
-  },
-];
-
+import { getActiveBanners } from "@/lib/bannerData";
+import { Banner } from "@/types/banner";
 const RotatingBanner = () => {
+  const [bannerData, setBannerData] = useState<Banner[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoplay, setIsAutoplay] = useState(true);
   const [direction, setDirection] = useState(0); // -1 for left, 1 for right
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load banners from admin panel
+  useEffect(() => {
+    const loadBanners = async () => {
+      try {
+        const activeBanners = await getActiveBanners();
+        setBannerData(activeBanners);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Failed to load banners:", error);
+        setIsLoading(false);
+      }
+    };
+    loadBanners();
+  }, []);
 
   // Auto-rotate banners
   useEffect(() => {
-    if (!isAutoplay) return;
+    if (!isAutoplay || bannerData.length === 0) return;
 
     const interval = setInterval(() => {
       setDirection(1);
@@ -75,7 +42,7 @@ const RotatingBanner = () => {
     }, 6000); // Change every 6 seconds
 
     return () => clearInterval(interval);
-  }, [isAutoplay]);
+  }, [isAutoplay, bannerData.length]);
 
   // Pause autoplay when hovering
   const handleMouseEnter = () => setIsAutoplay(false);
@@ -102,6 +69,35 @@ const RotatingBanner = () => {
   };
 
   const currentBanner = bannerData[currentIndex];
+
+  // Show loading state while banners are loading
+  if (isLoading) {
+    return (
+      <div className="relative w-full h-[70vh] overflow-hidden flex items-center justify-center bg-gradient-to-r from-primary/20 to-secondary/20">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading banners...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show message if no banners are available
+  if (!bannerData.length) {
+    return (
+      <div className="relative w-full h-[70vh] overflow-hidden flex items-center justify-center bg-gradient-to-r from-primary/20 to-secondary/20">
+        <div className="text-center">
+          <p className="text-lg font-medium mb-2">No banners available</p>
+          <p className="text-muted-foreground">Add banners from the admin panel to display here</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Safety check for current banner
+  if (!currentBanner) {
+    return null;
+  }
 
   // Animation variants
   const slideVariants = {
