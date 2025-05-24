@@ -78,8 +78,7 @@ const AnimeDetails = () => {
           className="absolute inset-0 bg-cover bg-center z-0"
           style={{ 
             backgroundImage: `url(${anime.coverImage || anime.imageUrl})`,
-            filter: 'blur(8px)',
-            transform: 'scale(1.1)'
+            transform: 'scale(1.05)'
           }}
         ></div>
         <div className="container mx-auto px-4 relative z-20 h-full flex items-end pb-8">
