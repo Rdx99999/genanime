@@ -13,6 +13,7 @@ This directory contains SQL migration files for the Supabase database.
 
 - `01_initial_schema.sql`: Creates the initial database schema including animes and download_links tables with proper RLS
 - `02_add_popular_new_release_columns.sql`: Adds is_popular and is_new_release columns to the animes table
+- `03_add_banners_table.sql`: Creates banners table for homepage banner management with customizable properties
 
 ## Database Schema
 

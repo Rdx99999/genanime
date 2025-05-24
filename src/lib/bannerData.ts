@@ -1,100 +1,295 @@
 import { Banner } from "@/types/banner";
+import { supabase } from "@/integrations/supabase/client";
 
-// In-memory banner storage (you can replace this with database integration later)
-let banners: Banner[] = [
-  {
-    id: "1",
-    title: "SOLO LEVELING",
-    subtitle: "Entertainment District Arc", 
-    description: "Tanjiro and his friends join the Sound Hashira Tengen Uzui on a mission in the Entertainment District.",
-    image: "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/efaa210d-b55f-407c-bec4-101ae2d536cd/de3iif2-1ef9bdfd-043c-4586-ae57-829bd61cc4cc.png/v1/fill/w_1280,h_427,q_80,strp/solo_leveling_banner_by_godakutsu_de3iif2-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9NDI3IiwicGF0aCI6IlwvZlwvZWZhYTIxMGQtYjU1Zi00MDdjLWJlYzQtMTAxYWUyZDUzNmNkXC9kZTNpaWYyLTFlZjliZGZkLTA0M2MtNDU4Ni1hZTU3LTgyOWJkNjFjYzRjYy5wbmciLCJ3aWR0aCI6Ijw9MTI4MCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.pvdQB7bL4EhmLd4oKo3eS1u4fjyubbPS_YYKokRRDQM",
-    color: "from-red-600/70 to-orange-600/30",
-    rating: "9.2",
-    episodes: 24,
-    isActive: true,
-    order: 1,
-    buttonText: "Watch Now",
-    buttonAction: "watch"
-  },
-  {
-    id: "2", 
-    title: "Attack on Titan",
-    subtitle: "Final Season",
-    description: "The final battle between humanity and the titans reaches its climactic conclusion.",
-    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=2070",
-    color: "from-blue-600/70 to-purple-600/30", 
-    rating: "9.5",
-    episodes: 12,
-    isActive: true,
-    order: 2,
-    buttonText: "Continue Watching",
-    buttonAction: "watch"
-  },
-  {
-    id: "3",
-    title: "Demon Slayer", 
-    subtitle: "Hashira Training Arc",
-    description: "Tanjiro trains with the Hashira to prepare for the final battle against Muzan.",
-    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?q=80&w=2070",
-    color: "from-green-600/70 to-teal-600/30",
-    rating: "9.0", 
-    episodes: 11,
-    isActive: true,
-    order: 3,
-    buttonText: "Start Watching", 
-    buttonAction: "watch"
-  }
-];
-
+// Get all banners from Supabase
 export const getAllBanners = async (): Promise<Banner[]> => {
-  return banners.sort((a, b) => a.order - b.order);
+  try {
+    const { data, error } = await supabase
+      .from('banners')
+      .select('*')
+      .order('display_order', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching banners:', error);
+      throw new Error(error.message);
+    }
+
+    // Transform data to match frontend Banner type
+    return data.map(item => ({
+      id: item.id,
+      title: item.title,
+      subtitle: item.subtitle,
+      description: item.description,
+      image: item.image,
+      color: item.color,
+      rating: item.rating,
+      episodes: item.episodes,
+      buttonText: item.button_text,
+      buttonAction: item.button_action,
+      isActive: item.is_active,
+      order: item.display_order,
+      animeId: item.anime_id
+    }));
+  } catch (error) {
+    console.error('Error in getAllBanners:', error);
+    throw error;
+  }
 };
 
+// Get only active banners from Supabase
 export const getActiveBanners = async (): Promise<Banner[]> => {
-  return banners.filter(banner => banner.isActive).sort((a, b) => a.order - b.order);
+  try {
+    const { data, error } = await supabase
+      .from('banners')
+      .select('*')
+      .eq('is_active', true)
+      .order('display_order', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching active banners:', error);
+      throw new Error(error.message);
+    }
+
+    return data.map(item => ({
+      id: item.id,
+      title: item.title,
+      subtitle: item.subtitle,
+      description: item.description,
+      image: item.image,
+      color: item.color,
+      rating: item.rating,
+      episodes: item.episodes,
+      buttonText: item.button_text,
+      buttonAction: item.button_action,
+      isActive: item.is_active,
+      order: item.display_order,
+      animeId: item.anime_id
+    }));
+  } catch (error) {
+    console.error('Error in getActiveBanners:', error);
+    throw error;
+  }
 };
 
+// Get banner by ID from Supabase
 export const getBannerById = async (id: string): Promise<Banner | null> => {
-  return banners.find(banner => banner.id === id) || null;
+  try {
+    const { data, error } = await supabase
+      .from('banners')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching banner by ID:', error);
+      return null;
+    }
+
+    return {
+      id: data.id,
+      title: data.title,
+      subtitle: data.subtitle,
+      description: data.description,
+      image: data.image,
+      color: data.color,
+      rating: data.rating,
+      episodes: data.episodes,
+      buttonText: data.button_text,
+      buttonAction: data.button_action,
+      isActive: data.is_active,
+      order: data.display_order,
+      animeId: data.anime_id
+    };
+  } catch (error) {
+    console.error('Error in getBannerById:', error);
+    return null;
+  }
 };
 
+// Create new banner in Supabase
 export const createBanner = async (bannerData: Omit<Banner, "id">): Promise<Banner> => {
-  const newBanner: Banner = {
-    ...bannerData,
-    id: Date.now().toString()
-  };
-  banners.push(newBanner);
-  return newBanner;
+  try {
+    const { data, error } = await supabase
+      .from('banners')
+      .insert([{
+        title: bannerData.title,
+        subtitle: bannerData.subtitle,
+        description: bannerData.description,
+        image: bannerData.image,
+        color: bannerData.color,
+        rating: bannerData.rating,
+        episodes: bannerData.episodes,
+        button_text: bannerData.buttonText,
+        button_action: bannerData.buttonAction,
+        is_active: bannerData.isActive,
+        display_order: bannerData.order,
+        anime_id: bannerData.animeId
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating banner:', error);
+      throw new Error(error.message);
+    }
+
+    return {
+      id: data.id,
+      title: data.title,
+      subtitle: data.subtitle,
+      description: data.description,
+      image: data.image,
+      color: data.color,
+      rating: data.rating,
+      episodes: data.episodes,
+      buttonText: data.button_text,
+      buttonAction: data.button_action,
+      isActive: data.is_active,
+      order: data.display_order,
+      animeId: data.anime_id
+    };
+  } catch (error) {
+    console.error('Error in createBanner:', error);
+    throw error;
+  }
 };
 
+// Update banner in Supabase
 export const updateBanner = async (id: string, bannerData: Partial<Banner>): Promise<Banner | null> => {
-  const index = banners.findIndex(banner => banner.id === id);
-  if (index === -1) return null;
-  
-  banners[index] = { ...banners[index], ...bannerData };
-  return banners[index];
+  try {
+    const updateData: any = {};
+    
+    if (bannerData.title !== undefined) updateData.title = bannerData.title;
+    if (bannerData.subtitle !== undefined) updateData.subtitle = bannerData.subtitle;
+    if (bannerData.description !== undefined) updateData.description = bannerData.description;
+    if (bannerData.image !== undefined) updateData.image = bannerData.image;
+    if (bannerData.color !== undefined) updateData.color = bannerData.color;
+    if (bannerData.rating !== undefined) updateData.rating = bannerData.rating;
+    if (bannerData.episodes !== undefined) updateData.episodes = bannerData.episodes;
+    if (bannerData.buttonText !== undefined) updateData.button_text = bannerData.buttonText;
+    if (bannerData.buttonAction !== undefined) updateData.button_action = bannerData.buttonAction;
+    if (bannerData.isActive !== undefined) updateData.is_active = bannerData.isActive;
+    if (bannerData.order !== undefined) updateData.display_order = bannerData.order;
+    if (bannerData.animeId !== undefined) updateData.anime_id = bannerData.animeId;
+
+    const { data, error } = await supabase
+      .from('banners')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating banner:', error);
+      throw new Error(error.message);
+    }
+
+    return {
+      id: data.id,
+      title: data.title,
+      subtitle: data.subtitle,
+      description: data.description,
+      image: data.image,
+      color: data.color,
+      rating: data.rating,
+      episodes: data.episodes,
+      buttonText: data.button_text,
+      buttonAction: data.button_action,
+      isActive: data.is_active,
+      order: data.display_order,
+      animeId: data.anime_id
+    };
+  } catch (error) {
+    console.error('Error in updateBanner:', error);
+    return null;
+  }
 };
 
+// Delete banner from Supabase
 export const deleteBanner = async (id: string): Promise<boolean> => {
-  const index = banners.findIndex(banner => banner.id === id);
-  if (index === -1) return false;
-  
-  banners.splice(index, 1);
-  return true;
+  try {
+    const { error } = await supabase
+      .from('banners')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting banner:', error);
+      throw new Error(error.message);
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error in deleteBanner:', error);
+    return false;
+  }
 };
 
+// Toggle banner active status in Supabase
 export const toggleBannerActive = async (id: string): Promise<Banner | null> => {
-  const banner = banners.find(b => b.id === id);
-  if (!banner) return null;
-  
-  banner.isActive = !banner.isActive;
-  return banner;
+  try {
+    // First get current status
+    const { data: currentData, error: fetchError } = await supabase
+      .from('banners')
+      .select('is_active')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching banner status:', fetchError);
+      return null;
+    }
+
+    // Update with opposite status
+    const { data, error } = await supabase
+      .from('banners')
+      .update({ is_active: !currentData.is_active })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error toggling banner status:', error);
+      return null;
+    }
+
+    return {
+      id: data.id,
+      title: data.title,
+      subtitle: data.subtitle,
+      description: data.description,
+      image: data.image,
+      color: data.color,
+      rating: data.rating,
+      episodes: data.episodes,
+      buttonText: data.button_text,
+      buttonAction: data.button_action,
+      isActive: data.is_active,
+      order: data.display_order,
+      animeId: data.anime_id
+    };
+  } catch (error) {
+    console.error('Error in toggleBannerActive:', error);
+    return null;
+  }
 };
 
+// Reorder banners in Supabase
 export const reorderBanners = async (bannerId: string, newOrder: number): Promise<boolean> => {
-  const banner = banners.find(b => b.id === bannerId);
-  if (!banner) return false;
-  
-  banner.order = newOrder;
-  return true;
+  try {
+    const { error } = await supabase
+      .from('banners')
+      .update({ display_order: newOrder })
+      .eq('id', bannerId);
+
+    if (error) {
+      console.error('Error reordering banner:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error in reorderBanners:', error);
+    return false;
+  }
 };
