@@ -898,6 +898,192 @@ const Admin = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Banner Creation/Edit Dialog */}
+      <Dialog open={isBannerDialogOpen} onOpenChange={setIsBannerDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {isEditingBanner ? "Edit Banner" : "Create New Banner"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Banner Title *</Label>
+                <Input
+                  id="title"
+                  value={bannerForm.title}
+                  onChange={(e) => setBannerForm({...bannerForm, title: e.target.value})}
+                  placeholder="e.g., SOLO LEVELING"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="subtitle">Subtitle</Label>
+                <Input
+                  id="subtitle"
+                  value={bannerForm.subtitle}
+                  onChange={(e) => setBannerForm({...bannerForm, subtitle: e.target.value})}
+                  placeholder="e.g., Entertainment District Arc"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description *</Label>
+              <Textarea
+                id="description"
+                value={bannerForm.description}
+                onChange={(e) => setBannerForm({...bannerForm, description: e.target.value})}
+                placeholder="Enter banner description..."
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="image">Banner Image URL *</Label>
+              <Input
+                id="image"
+                value={bannerForm.image}
+                onChange={(e) => setBannerForm({...bannerForm, image: e.target.value})}
+                placeholder="https://example.com/banner-image.jpg"
+              />
+              {bannerForm.image && (
+                <div className="mt-2">
+                  <div 
+                    className="w-full h-32 rounded bg-cover bg-center border"
+                    style={{ backgroundImage: `url(${bannerForm.image})` }}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="color">Gradient Color</Label>
+              <Select 
+                value={bannerForm.color} 
+                onValueChange={(value) => setBannerForm({...bannerForm, color: value})}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select gradient color" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="from-red-600/70 to-orange-600/30">Red to Orange</SelectItem>
+                  <SelectItem value="from-blue-600/70 to-purple-600/30">Blue to Purple</SelectItem>
+                  <SelectItem value="from-green-600/70 to-teal-600/30">Green to Teal</SelectItem>
+                  <SelectItem value="from-purple-600/70 to-pink-600/30">Purple to Pink</SelectItem>
+                  <SelectItem value="from-yellow-600/70 to-red-600/30">Yellow to Red</SelectItem>
+                  <SelectItem value="from-indigo-600/70 to-blue-600/30">Indigo to Blue</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="rating">Rating</Label>
+                <Input
+                  id="rating"
+                  value={bannerForm.rating}
+                  onChange={(e) => setBannerForm({...bannerForm, rating: e.target.value})}
+                  placeholder="e.g., 9.2"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="episodes">Episodes</Label>
+                <Input
+                  id="episodes"
+                  type="number"
+                  value={bannerForm.episodes}
+                  onChange={(e) => setBannerForm({...bannerForm, episodes: e.target.value})}
+                  placeholder="e.g., 24"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="order">Display Order</Label>
+                <Input
+                  id="order"
+                  type="number"
+                  value={bannerForm.order}
+                  onChange={(e) => setBannerForm({...bannerForm, order: parseInt(e.target.value) || 1})}
+                  min="1"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="buttonText">Button Text</Label>
+                <Input
+                  id="buttonText"
+                  value={bannerForm.buttonText}
+                  onChange={(e) => setBannerForm({...bannerForm, buttonText: e.target.value})}
+                  placeholder="e.g., Watch Now"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="buttonAction">Button Action</Label>
+                <Select 
+                  value={bannerForm.buttonAction} 
+                  onValueChange={(value) => setBannerForm({...bannerForm, buttonAction: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select action" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="watch">Watch Now</SelectItem>
+                    <SelectItem value="info">More Info</SelectItem>
+                    <SelectItem value="download">Download</SelectItem>
+                    <SelectItem value="trailer">Watch Trailer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="isActive"
+                checked={bannerForm.isActive}
+                onCheckedChange={(checked) => setBannerForm({...bannerForm, isActive: checked})}
+              />
+              <Label htmlFor="isActive">Banner Active</Label>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 mt-6">
+            <Button variant="outline" onClick={() => setIsBannerDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={isEditingBanner ? handleUpdateBanner : handleCreateBanner}>
+              {isEditingBanner ? "Update Banner" : "Create Banner"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Banner Delete Dialog */}
+      <Dialog open={isBannerDeleteDialogOpen} onOpenChange={setIsBannerDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-destructive">Delete Banner</DialogTitle>
+          </DialogHeader>
+          <div className="py-3">
+            <p className="mb-2">
+              Are you sure you want to delete the banner <strong>"{selectedBanner?.title}"</strong>?
+            </p>
+            <p className="text-sm text-muted-foreground">
+              This action cannot be undone and will remove the banner from your homepage.
+            </p>
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setIsBannerDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteBanner}>
+              <Trash2 className="h-4 w-4 mr-2" /> Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
