@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { getActiveBanners } from "@/lib/bannerData";
 import { Banner } from "@/types/banner";
 const RotatingBanner = () => {
@@ -16,6 +17,7 @@ const RotatingBanner = () => {
   const [isAutoplay, setIsAutoplay] = useState(true);
   const [direction, setDirection] = useState(0); // -1 for left, 1 for right
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   // Load banners from admin panel
   useEffect(() => {
@@ -66,6 +68,20 @@ const RotatingBanner = () => {
   const goToSlide = (index) => {
     setDirection(index > currentIndex ? 1 : -1);
     setCurrentIndex(index);
+  };
+
+  // Handle Watch Now button click
+  const handleWatchNow = () => {
+    if (currentBanner?.watchUrl) {
+      navigate(currentBanner.watchUrl);
+    }
+  };
+
+  // Handle More Info button click  
+  const handleMoreInfo = () => {
+    if (currentBanner?.animeId) {
+      navigate(`/anime/${currentBanner.animeId}`);
+    }
   };
 
   const currentBanner = bannerData[currentIndex];
@@ -201,13 +217,15 @@ const RotatingBanner = () => {
                   <Button
                     size="lg"
                     className="rounded-full gap-2 bg-primary hover:bg-primary/90 hover:scale-105 transition-all"
+                    onClick={handleWatchNow}
                   >
-                    <Play className="h-4 w-4" /> Watch Now
+                    <Play className="h-4 w-4" /> {currentBanner.buttonText || "Watch Now"}
                   </Button>
                   <Button
                     variant="outline"
                     size="lg"
                     className="rounded-full bg-black/30 border-white/30 text-white gap-2 hover:bg-black/50 hover:border-white/50 transition-all"
+                    onClick={handleMoreInfo}
                   >
                     <Info className="h-4 w-4" /> More Info
                   </Button>
