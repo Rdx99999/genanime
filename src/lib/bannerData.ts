@@ -123,6 +123,7 @@ export const createBanner = async (bannerData: Omit<Banner, "id">): Promise<Bann
         episodes: bannerData.episodes,
         button_text: bannerData.buttonText,
         button_action: bannerData.buttonAction,
+        watch_url: bannerData.watchUrl,
         is_active: bannerData.isActive,
         display_order: bannerData.order,
         anime_id: bannerData.animeId
@@ -146,6 +147,7 @@ export const createBanner = async (bannerData: Omit<Banner, "id">): Promise<Bann
       episodes: data.episodes,
       buttonText: data.button_text,
       buttonAction: data.button_action,
+      watchUrl: data.watch_url,
       isActive: data.is_active,
       order: data.display_order,
       animeId: data.anime_id
@@ -160,7 +162,7 @@ export const createBanner = async (bannerData: Omit<Banner, "id">): Promise<Bann
 export const updateBanner = async (id: string, bannerData: Partial<Banner>): Promise<Banner | null> => {
   try {
     const updateData: any = {};
-    
+
     if (bannerData.title !== undefined) updateData.title = bannerData.title;
     if (bannerData.subtitle !== undefined) updateData.subtitle = bannerData.subtitle;
     if (bannerData.description !== undefined) updateData.description = bannerData.description;
@@ -170,6 +172,7 @@ export const updateBanner = async (id: string, bannerData: Partial<Banner>): Pro
     if (bannerData.episodes !== undefined) updateData.episodes = bannerData.episodes;
     if (bannerData.buttonText !== undefined) updateData.button_text = bannerData.buttonText;
     if (bannerData.buttonAction !== undefined) updateData.button_action = bannerData.buttonAction;
+     if (bannerData.watchUrl !== undefined) updateData.watch_url = bannerData.watchUrl;
     if (bannerData.isActive !== undefined) updateData.is_active = bannerData.isActive;
     if (bannerData.order !== undefined) updateData.display_order = bannerData.order;
     if (bannerData.animeId !== undefined) updateData.anime_id = bannerData.animeId;
@@ -197,6 +200,7 @@ export const updateBanner = async (id: string, bannerData: Partial<Banner>): Pro
       episodes: data.episodes,
       buttonText: data.button_text,
       buttonAction: data.button_action,
+      watchUrl: data.watch_url,
       isActive: data.is_active,
       order: data.display_order,
       animeId: data.anime_id
