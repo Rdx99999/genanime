@@ -71,30 +71,77 @@ const AnimeDetails = () => {
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
 
-      {/* Hero banner with blurred background */}
-      <div className="relative w-full h-[300px] overflow-hidden">
-        <div className="absolute inset-0 bg-black/60 z-10"></div>
-        <div 
+      {/* Enhanced hero banner with parallax effect */}
+      <div className="relative w-full h-[400px] overflow-hidden">
+        {/* Gradient overlay for better text visibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent z-10"></div>
+        
+        {/* Side gradients for visual flair */}
+        <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-primary/30 to-transparent opacity-40 z-5"></div>
+        <div className="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-primary/30 to-transparent opacity-40 z-5"></div>
+        
+        {/* Background image with subtle motion effect */}
+        <motion.div 
           className="absolute inset-0 bg-cover bg-center z-0"
           style={{ 
             backgroundImage: `url(${anime.coverImage || anime.imageUrl})`,
-            transform: 'scale(1.05)'
           }}
-        ></div>
-        <div className="container mx-auto px-4 relative z-20 h-full flex items-end pb-8">
+          initial={{ scale: 1.05 }}
+          animate={{ 
+            scale: 1.08,
+            y: -5
+          }}
+          transition={{ 
+            duration: 20, 
+            repeat: Infinity, 
+            repeatType: "reverse", 
+            ease: "easeInOut" 
+          }}
+        ></motion.div>
+        
+        {/* Content container with improved spacing */}
+        <div className="container mx-auto px-4 relative z-20 h-full flex flex-col justify-end pb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
+            className="max-w-3xl"
           >
             <Button 
               variant="outline" 
               onClick={() => navigate(-1)} 
-              className="mb-4 bg-background/80 backdrop-blur-sm"
+              className="mb-6 bg-background/80 backdrop-blur-sm hover:bg-background/90 transition-all"
             >
               <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </Button>
-            <h1 className="text-3xl md:text-4xl font-bold text-white">{anime.title}</h1>
+            
+            <h1 className="text-3xl md:text-5xl font-bold text-white mb-3 drop-shadow-md">{anime.title}</h1>
+            
+            {/* Quick info section with badges */}
+            <div className="flex flex-wrap gap-3 mb-3">
+              {anime.releaseYear && (
+                <Badge variant="secondary" className="bg-primary/20 backdrop-blur-md text-white border-primary/30 px-3 py-1">
+                  <Calendar className="h-3 w-3 mr-1" /> {anime.releaseYear}
+                </Badge>
+              )}
+              {anime.episodes && (
+                <Badge variant="secondary" className="bg-primary/20 backdrop-blur-md text-white border-primary/30 px-3 py-1">
+                  <FileVideo className="h-3 w-3 mr-1" /> {anime.episodes} Episodes
+                </Badge>
+              )}
+              {anime.genres && anime.genres.length > 0 && (
+                <Badge variant="secondary" className="bg-primary/20 backdrop-blur-md text-white border-primary/30 px-3 py-1">
+                  {anime.genres[0]}
+                </Badge>
+              )}
+            </div>
+            
+            {/* Brief description preview */}
+            {anime.description && (
+              <p className="text-white/80 text-sm md:text-base max-w-2xl line-clamp-2 backdrop-blur-sm bg-black/10 p-2 rounded-md">
+                {anime.description}
+              </p>
+            )}
           </motion.div>
         </div>
       </div>
@@ -119,7 +166,7 @@ const AnimeDetails = () => {
               />
             </motion.div>
 
-            {/* Anime info cards */}
+            {/* Enhanced anime info cards with glass morphism */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -127,35 +174,47 @@ const AnimeDetails = () => {
               className="grid grid-cols-2 gap-3"
             >
               {anime.releaseYear && (
-                <div className="bg-secondary/30 p-3 rounded-lg border border-primary/20 flex items-center">
-                  <Calendar className="h-4 w-4 mr-2 text-primary" />
+                <div className="bg-gradient-to-br from-secondary/40 to-primary/10 backdrop-blur-md p-4 rounded-lg border border-primary/30 flex items-center shadow-lg hover:shadow-primary/10 hover:border-primary/40 transition-all duration-300">
+                  <div className="p-2 rounded-full bg-primary/20 mr-3">
+                    <Calendar className="h-4 w-4 text-primary" />
+                  </div>
                   <div>
-                    <h3 className="text-xs font-medium text-muted-foreground">Year</h3>
-                    <p className="font-semibold">{anime.releaseYear}</p>
+                    <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Year</h3>
+                    <p className="font-bold text-lg">{anime.releaseYear}</p>
                   </div>
                 </div>
               )}
               {anime.episodes && (
-                <div className="bg-secondary/30 p-3 rounded-lg border border-primary/20 flex items-center">
-                  <FileVideo className="h-4 w-4 mr-2 text-primary" />
+                <div className="bg-gradient-to-br from-secondary/40 to-primary/10 backdrop-blur-md p-4 rounded-lg border border-primary/30 flex items-center shadow-lg hover:shadow-primary/10 hover:border-primary/40 transition-all duration-300">
+                  <div className="p-2 rounded-full bg-primary/20 mr-3">
+                    <FileVideo className="h-4 w-4 text-primary" />
+                  </div>
                   <div>
-                    <h3 className="text-xs font-medium text-muted-foreground">Episodes</h3>
-                    <p className="font-semibold">{anime.episodes}</p>
+                    <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Episodes</h3>
+                    <p className="font-bold text-lg">{anime.episodes}</p>
                   </div>
                 </div>
               )}
             </motion.div>
 
-            {/* Genres */}
+            {/* Genres with enhanced visual style */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
+              className="bg-secondary/20 p-4 rounded-lg border border-primary/20 shadow-lg"
             >
-              <h3 className="text-sm font-medium mb-2 text-muted-foreground">Genres</h3>
+              <h3 className="text-sm font-medium mb-3 text-foreground flex items-center">
+                <span className="h-5 w-1 bg-primary rounded-full mr-2"></span>
+                Genres
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {anime.genres?.map((genre) => (
-                  <Badge key={genre} variant="outline" className="bg-primary/10 border-primary/20 text-xs">
+                  <Badge 
+                    key={genre} 
+                    variant="outline" 
+                    className="bg-gradient-to-r from-primary/20 to-secondary/20 border-primary/30 text-xs py-1 px-3 hover:scale-105 transition-transform cursor-default"
+                  >
                     {genre}
                   </Badge>
                 ))}
@@ -169,47 +228,83 @@ const AnimeDetails = () => {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="space-y-8"
           >
-            {/* Anime description with styled box */}
-            <div className="bg-secondary/20 p-6 rounded-lg border border-primary/10 shadow-lg">
-              <h2 className="text-xl font-semibold mb-3 flex items-center">
-                <Info className="h-5 w-5 mr-2 text-primary" />
-                About
+            {/* Enhanced anime description with styled box */}
+            <div className="bg-gradient-to-br from-secondary/30 to-secondary/10 p-6 rounded-lg border border-primary/20 shadow-lg relative overflow-hidden group">
+              {/* Decorative elements */}
+              <div className="absolute -top-10 -right-10 w-20 h-20 bg-primary/10 rounded-full blur-xl"></div>
+              <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-primary/10 rounded-full blur-xl"></div>
+              
+              <h2 className="text-xl font-semibold mb-4 flex items-center relative">
+                <div className="p-2 rounded-md bg-primary/10 mr-3 group-hover:bg-primary/20 transition-colors">
+                  <Info className="h-5 w-5 text-primary" />
+                </div>
+                <span className="relative">
+                  About
+                  <span className="absolute -bottom-1 left-0 w-1/3 h-0.5 bg-primary rounded-full"></span>
+                </span>
               </h2>
-              <p className="text-foreground/90 leading-relaxed">
+              <p className="text-foreground/90 leading-relaxed text-base md:text-lg relative z-10">
                 {anime.description || "No description available."}
               </p>
             </div>
 
-            {/* Download section with styled header */}
-            <div className="space-y-4">
+            {/* Enhanced download section with better visual elements */}
+            <div className="space-y-5">
               <div className="flex items-center">
-                <div className="h-8 w-1 bg-gradient-to-b from-primary to-primary/30 rounded-full mr-3"></div>
-                <h2 className="text-xl font-semibold">Download Episodes</h2>
+                <div className="h-10 w-1.5 bg-gradient-to-b from-primary to-primary/30 rounded-full mr-3 shadow-lg shadow-primary/20"></div>
+                <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">Episodes</h2>
               </div>
 
-              <div className="bg-secondary/10 p-6 rounded-lg border border-primary/10 shadow-lg">
-                {anime.downloadLinks && anime.downloadLinks.length > 0 ? (
-                  <div>
-                    <h3 className="text-lg font-medium mb-4 flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 mr-2 text-primary"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                      Watch or Download Episodes
+              <div className="bg-gradient-to-br from-secondary/20 to-background border border-primary/20 rounded-xl shadow-xl overflow-hidden">
+                <div className="bg-primary/5 border-b border-primary/10 px-6 py-4">
+                  {anime.downloadLinks && anime.downloadLinks.length > 0 ? (
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                      <h3 className="text-lg font-medium flex items-center">
+                        <div className="p-1.5 rounded-md bg-primary/10 mr-2.5">
+                          <Play className="h-4 w-4 text-primary" />
+                        </div>
+                        Watch or Download Episodes
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1 md:mt-0">
+                        <span className="text-primary font-semibold">{anime.episodes}</span> episodes available
+                      </p>
+                    </div>
+                  ) : (
+                    <h3 className="text-lg font-medium flex items-center">
+                      <div className="p-1.5 rounded-md bg-primary/10 mr-2.5">
+                        <Info className="h-4 w-4 text-primary" />
+                      </div>
+                      Episode Status
                     </h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      This anime has {anime.episodes} episodes. Use the filters below to find specific episodes.
-                    </p>
-                    <EpisodeDownloadList 
+                  )}
+                </div>
+                
+                <div className="p-6">
+                  {anime.downloadLinks && anime.downloadLinks.length > 0 ? (
+                    <div>
+                      <div className="bg-primary/5 p-3 rounded-lg mb-4 border border-primary/10">
+                        <p className="text-sm flex items-center">
+                          <Info className="h-4 w-4 mr-2 text-primary/70" />
+                          Use the filters below to find specific episodes. Click on an episode to watch or download.
+                        </p>
+                      </div>
+                      <EpisodeDownloadList 
                         downloadLinks={anime.downloadLinks || []} 
                         episodeCount={anime.episodes}
                         animeId={anime.id}
                       />
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <Download className="h-12 w-12 text-muted-foreground mb-4 opacity-50" />
-                    <p className="text-muted-foreground">No episodes available yet</p>
-                    <p className="text-xs text-muted-foreground mt-2">Check back later for updates</p>
-                  </div>
-                )}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-12 text-center bg-secondary/10 rounded-lg">
+                      <div className="relative">
+                        <Download className="h-16 w-16 text-muted-foreground mb-4 opacity-50" />
+                        <div className="absolute inset-0 animate-ping h-16 w-16 rounded-full bg-primary/10 opacity-75"></div>
+                      </div>
+                      <p className="text-lg font-medium text-muted-foreground">No episodes available yet</p>
+                      <p className="text-sm text-muted-foreground mt-2 max-w-md">We're working on adding episodes for this anime. Check back later for updates.</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </motion.div>
