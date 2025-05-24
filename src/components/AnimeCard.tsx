@@ -15,7 +15,7 @@ const AnimeCard = ({ anime, onClick }: AnimeCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-  
+
   const handleClick = (e: React.MouseEvent) => {
     if (onClick) {
       onClick(e);

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { getAllAnimes } from "@/lib/animeData";
 import { Anime } from "@/types/anime";
@@ -12,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Footer from "@/components/Footer";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const [animes, setAnimes] = useState<Anime[]>([]);
@@ -21,6 +23,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     fetchAnimes();
@@ -70,10 +73,10 @@ const Index = () => {
       <Navbar />
       <RotatingBanner />
 
-      <div className="container mx-auto px-4 py-6 md:py-12">
+      <div className="w-full px-4 sm:px-6 lg:container lg:mx-auto py-6 md:py-10">
         <div className="flex flex-col mb-6 md:mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold mb-2">Explore Anime</h2>
-          <p className="text-foreground/70 max-w-2xl text-sm md:text-base">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2">Explore Anime</h2>
+          <p className="text-foreground/70 max-w-2xl text-xs sm:text-sm md:text-base">
             Discover the best anime from our collection, ready to stream and download in high quality
           </p>
         </div>
@@ -96,21 +99,21 @@ const Index = () => {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <span className="ml-2 text-lg">Loading animes...</span>
+          <div className="flex flex-col justify-center items-center py-12 sm:py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
+            <span className="text-base sm:text-lg">Loading animes...</span>
           </div>
         ) : error ? (
-          <div className="text-center py-20">
-            <p className="text-red-500 text-xl">{error}</p>
-            <Button onClick={() => fetchAnimes()} className="mt-4">
+          <div className="text-center py-12 sm:py-20">
+            <p className="text-red-500 text-base sm:text-xl mb-4">{error}</p>
+            <Button onClick={() => fetchAnimes()} size={isMobile ? "sm" : "default"}>
               Try Again
             </Button>
           </div>
         ) : (
           <>
             {filteredAnimes && filteredAnimes.length > 0 ? (
-              <div className="space-y-8">
+              <div className="space-y-6 sm:space-y-8 md:space-y-12">
                 <AnimeSlider 
                   title="Featured Anime" 
                   description="Most popular titles" 
@@ -140,22 +143,25 @@ const Index = () => {
                 />
               </div>
             ) : (
-              <div className="text-center py-20">
+              <div className="text-center py-12 sm:py-20">
                 {searchQuery ? (
-                  <p className="text-xl text-foreground/70">No anime found matching "{searchQuery}"</p>
+                  <p className="text-base sm:text-xl text-foreground/70">No anime found matching "{searchQuery}"</p>
                 ) : (
-                  <p className="text-xl text-foreground/70">No anime available at the moment</p>
+                  <p className="text-base sm:text-xl text-foreground/70">No anime available at the moment</p>
                 )}
-                <p className="mt-2">Check back later or add some from the admin panel</p>
+                <p className="mt-2 text-sm sm:text-base">Check back later or add some from the admin panel</p>
               </div>
             )}
           </>
         )}
       </div>
 
-      <Dialog open={!!selectedAnime} onOpenChange={(open) => !open && setSelectedAnime(null)}>
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        setIsDialogOpen(open);
+        if (!open) setSelectedAnime(null);
+      }}>
         {selectedAnime && (
-          <DialogContent className="max-w-4xl w-[calc(100%-1rem)] sm:w-[calc(100%-2rem)] h-[calc(100vh-2rem)] sm:h-[calc(100vh-4rem)] max-h-[800px] overflow-hidden flex flex-col p-3 sm:p-6">
+          <DialogContent className="max-w-md sm:max-w-2xl md:max-w-4xl w-[95%] sm:w-[90%] h-[90vh] sm:h-[85vh] md:h-[80vh] max-h-[800px] overflow-hidden flex flex-col p-3 sm:p-6">
             <DialogHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-2 space-y-2 sm:space-y-0">
               <DialogTitle className="text-lg sm:text-xl md:text-2xl line-clamp-2">{selectedAnime.title}</DialogTitle>
               <div className="flex flex-wrap gap-1">
@@ -167,8 +173,8 @@ const Index = () => {
               </div>
             </DialogHeader>
             <div className="flex-1 overflow-y-auto -mr-3 pr-3 sm:-mr-6 sm:pr-6">
-              <div className="grid grid-cols-1 md:grid-cols-[minmax(120px,300px)_1fr] gap-3 sm:gap-4 md:gap-6">
-                <div className="relative aspect-[2/3] w-full max-w-[180px] sm:max-w-[300px] mx-auto md:mx-0 bg-muted rounded-lg overflow-hidden">
+              <div className="grid grid-cols-1 sm:grid-cols-[minmax(120px,250px)_1fr] gap-3 sm:gap-4 md:gap-6">
+                <div className="relative aspect-[2/3] w-full max-w-[180px] sm:max-w-[250px] mx-auto sm:mx-0 bg-muted rounded-lg overflow-hidden">
                   <img 
                     src={selectedAnime.imageUrl} 
                     alt={selectedAnime.title}
@@ -203,12 +209,12 @@ const Index = () => {
                   </div>
                   <div>
                     <h4 className="font-medium text-sm md:text-base mb-1 md:mb-2">Watch or Download</h4>
-                    {selectedAnime.downloadLinks.length > 0 ? (
+                    {selectedAnime.downloadLinks && selectedAnime.downloadLinks.length > 0 ? (
                       <EpisodeDownloadList downloadLinks={selectedAnime.downloadLinks} />
                     ) : (
                       <div className="flex flex-col items-center justify-center py-6 text-center">
-                        <Download className="h-8 w-8 text-muted-foreground mb-3 opacity-50" />
-                        <p className="text-sm text-muted-foreground">No episodes available</p>
+                        <Download className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground mb-3 opacity-50" />
+                        <p className="text-xs sm:text-sm text-muted-foreground">No episodes available</p>
                       </div>
                     )}
                   </div>
