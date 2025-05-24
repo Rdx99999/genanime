@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const getAllBanners = async (): Promise<Banner[]> => {
   try {
     const { data, error } = await supabase
-      .from('banners')
+      .from('banners' as any)
       .select('*')
       .order('display_order', { ascending: true });
 
@@ -15,7 +15,7 @@ export const getAllBanners = async (): Promise<Banner[]> => {
     }
 
     // Transform data to match frontend Banner type
-    return data.map(item => ({
+    return data.map((item: any) => ({
       id: item.id,
       title: item.title,
       subtitle: item.subtitle,
@@ -26,6 +26,7 @@ export const getAllBanners = async (): Promise<Banner[]> => {
       episodes: item.episodes,
       buttonText: item.button_text,
       buttonAction: item.button_action,
+      watchUrl: item.watch_url,
       isActive: item.is_active,
       order: item.display_order,
       animeId: item.anime_id
@@ -61,6 +62,7 @@ export const getActiveBanners = async (): Promise<Banner[]> => {
       episodes: item.episodes,
       buttonText: item.button_text,
       buttonAction: item.button_action,
+      watchUrl: item.watch_url,
       isActive: item.is_active,
       order: item.display_order,
       animeId: item.anime_id

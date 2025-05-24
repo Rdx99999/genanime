@@ -11,5 +11,6 @@ export interface Banner {
   order: number;
   buttonText?: string;
   buttonAction?: string;
+  watchUrl?: string;
   animeId?: string;
 }

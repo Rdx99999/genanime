@@ -1,6 +1,6 @@
 -- Migration: Add banners table for homepage banner management
 -- Version: 03
--- Description: Creates banners table to store customizable homepage banners
+-- Description: Creates banners table to store customizable homepage banners with watch URLs
 
 -- Create banners table
 CREATE TABLE IF NOT EXISTS banners (
@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS banners (
   episodes INTEGER,
   button_text TEXT DEFAULT 'Watch Now',
   button_action TEXT DEFAULT 'watch',
+  watch_url TEXT,
   is_active BOOLEAN DEFAULT true,
   display_order INTEGER DEFAULT 1,
   anime_id UUID REFERENCES animes(id) ON DELETE SET NULL,
@@ -51,7 +52,7 @@ FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
 
 -- Insert default banner data
-INSERT INTO banners (title, subtitle, description, image, color, rating, episodes, button_text, button_action, is_active, display_order)
+INSERT INTO banners (title, subtitle, description, image, color, rating, episodes, button_text, button_action, watch_url, is_active, display_order)
 VALUES 
   (
     'SOLO LEVELING',
@@ -63,6 +64,7 @@ VALUES
     24,
     'Watch Now',
     'watch',
+    '/video-player?anime=solo-leveling&episode=1',
     true,
     1
   ),
@@ -76,6 +78,7 @@ VALUES
     12,
     'Continue Watching',
     'watch',
+    '/video-player?anime=attack-on-titan&episode=1',
     true,
     2
   ),
@@ -89,6 +92,7 @@ VALUES
     11,
     'Start Watching',
     'watch',
+    '/video-player?anime=demon-slayer&episode=1',
     true,
     3
   )

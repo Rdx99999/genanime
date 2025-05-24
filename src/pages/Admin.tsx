@@ -255,6 +255,7 @@ const Admin = () => {
       episodes: "",
       buttonText: "Watch Now",
       buttonAction: "watch",
+      watchUrl: "",
       isActive: true,
       order: 1
     });
@@ -274,6 +275,7 @@ const Admin = () => {
       episodes: banner.episodes?.toString() || "",
       buttonText: banner.buttonText || "Watch Now",
       buttonAction: banner.buttonAction || "watch",
+      watchUrl: banner.watchUrl || "",
       isActive: banner.isActive,
       order: banner.order
     });
@@ -976,6 +978,19 @@ const Admin = () => {
                   <SelectItem value="from-indigo-600/70 to-blue-600/30">Indigo to Blue</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="watchUrl">Watch Now URL</Label>
+              <Input
+                id="watchUrl"
+                value={bannerForm.watchUrl}
+                onChange={(e) => setBannerForm({...bannerForm, watchUrl: e.target.value})}
+                placeholder="e.g., /video-player?anime=solo-leveling&episode=1"
+              />
+              <p className="text-xs text-muted-foreground">
+                The URL users will be redirected to when clicking the "Watch Now" button
+              </p>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
