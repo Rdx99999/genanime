@@ -84,6 +84,7 @@ export const getAnimeById = async (id: string): Promise<Anime | null> => {
       title: anime.title,
       description: anime.description,
       imageUrl: anime.image_url,
+      coverImage: anime.cover_image,
       releaseYear: anime.release_year,
       episodes: anime.episodes,
       genres: anime.genres,
@@ -149,6 +150,7 @@ export const createAnime = async (animeData: Omit<Anime, "id">): Promise<Anime |
         title: animeData.title,
         description: animeData.description,
         image_url: animeData.imageUrl,
+        cover_image: animeData.coverImage,
         release_year: animeData.releaseYear,
         episodes: animeData.episodes,
         genres: animeData.genres,
@@ -210,6 +212,7 @@ export const updateAnime = async (id: string, animeData: Omit<Anime, "id">): Pro
         title: animeData.title,
         description: animeData.description,
         image_url: animeData.imageUrl,
+        cover_image: animeData.coverImage,
         release_year: animeData.releaseYear,
         episodes: animeData.episodes,
         genres: animeData.genres

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,10 +32,11 @@ const AnimeForm = ({ id, initialData, onSubmit, isEditing = false, isSubmitting 
     genres: initialData?.genres || [],
     episodes: initialData?.episodes || 1,
     downloadLinks: initialData?.downloadLinks || [],
+    coverImage: initialData?.coverImage || "", // added coverImage
   });
 
   const [newGenre, setNewGenre] = useState("");
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -69,7 +69,7 @@ const AnimeForm = ({ id, initialData, onSubmit, isEditing = false, isSubmitting 
       url: "",
       episodeNumber: 1
     };
-    
+
     setFormData(prev => ({
       ...prev,
       downloadLinks: [...prev.downloadLinks, newLink]
@@ -114,18 +114,37 @@ const AnimeForm = ({ id, initialData, onSubmit, isEditing = false, isSubmitting 
               placeholder="Anime title"
             />
           </div>
-          
+
           <div>
             <Label htmlFor="imageUrl">Image URL</Label>
-            <Input
-              id="imageUrl"
-              name="imageUrl"
-              value={formData.imageUrl}
-              onChange={handleInputChange}
-              placeholder="https://example.com/image.jpg"
-            />
+              <Input
+                id="imageUrl"
+                name="imageUrl"
+                value={formData.imageUrl}
+                onChange={handleInputChange}
+                placeholder="https://example.com/image.jpg"
+              />
+            </div>
+
+          <div>
+              <Label htmlFor="coverImage">Banner URL (for anime details page)</Label>
+              <Input
+                id="coverImage"
+                name="coverImage"
+                value={formData.coverImage || ""}
+                onChange={handleInputChange}
+                placeholder="https://example.com/banner-image.jpg"
+              />
+              {formData.coverImage && (
+                <div className="mt-2">
+                  <div 
+                    className="w-full h-24 rounded bg-cover bg-center border"
+                    style={{ backgroundImage: `url(${formData.coverImage})` }}
+                  />
+                </div>
+              )}
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="releaseYear">Release Year</Label>
@@ -151,7 +170,7 @@ const AnimeForm = ({ id, initialData, onSubmit, isEditing = false, isSubmitting 
               />
             </div>
           </div>
-          
+
           <div>
             <Label>Genres</Label>
             <div className="flex flex-wrap gap-2 mt-2">
@@ -178,7 +197,7 @@ const AnimeForm = ({ id, initialData, onSubmit, isEditing = false, isSubmitting 
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <div>
             <Label htmlFor="description">Description</Label>
@@ -192,7 +211,7 @@ const AnimeForm = ({ id, initialData, onSubmit, isEditing = false, isSubmitting 
               className="h-32"
             />
           </div>
-          
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex justify-between items-center">
@@ -260,7 +279,7 @@ const AnimeForm = ({ id, initialData, onSubmit, isEditing = false, isSubmitting 
           </Card>
         </div>
       </div>
-      
+
       {!id && (
         <div className="flex justify-end">
           <Button type="submit" disabled={isSubmitting}>
