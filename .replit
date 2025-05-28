@@ -1,6 +1,10 @@
 modules = ["nodejs-20", "postgresql-16"]
 
 [[ports]]
+localPort = 4173
+externalPort = 3003
+
+[[ports]]
 localPort = 5000
 externalPort = 5000
 
