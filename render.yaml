@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: genanime
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm install -g serve && serve -s dist -l $PORT
+    envVars:
+      - key: NODE_VERSION
+        value: 20.0.0
+      - key: NODE_ENV
+        value: production
+      - key: VITE_APP_TITLE
+        value: Anime Streaming App
+      - key: VITE_APP_API_URL
+        value: https://api.example.com
+      - key: VITE_APP_SUPABASE_URL
+        value: https://pmmdhslodtbwyxoatnrw.supabase.co
+      - key: VITE_APP_SUPABASE_ANON_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtbWRoc2xvZHRid3l4b2F0bnJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc1ODQzOTEsImV4cCI6MjA2MzE2MDM5MX0.y8Y20mNpmzugAYQq-EhVYcrdMs7Xcg-5CbqNvc1p5O8
+      - key: VITE_APP_ADMIN_USERNAME
+        value: admin
+        sync: false
+      - key: VITE_APP_ADMIN_PASSWORD
+        value: adminpassword123
+        sync: false
+    healthCheckPath: /
+    autoDeploy: true
