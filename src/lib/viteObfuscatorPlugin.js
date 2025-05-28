@@ -7,24 +7,24 @@ import JavaScriptObfuscator from 'javascript-obfuscator';
 export default function obfuscatorPlugin(options = {}) {
   const defaultOptions = {
     compact: true,
-    controlFlowFlattening: true,
-    controlFlowFlatteningThreshold: 0.75,
-    deadCodeInjection: true,
-    deadCodeInjectionThreshold: 0.4,
-    debugProtection: true,
-    debugProtectionInterval: true,
-    disableConsoleOutput: true,
+    controlFlowFlattening: false,
+    controlFlowFlatteningThreshold: 0,
+    deadCodeInjection: false,
+    deadCodeInjectionThreshold: 0,
+    debugProtection: false,
+    debugProtectionInterval: false,
+    disableConsoleOutput: false,
     identifierNamesGenerator: 'hexadecimal',
     log: false,
     renameGlobals: false,
-    rotateStringArray: true,
-    selfDefending: true,
-    splitStrings: true,
-    splitStringsChunkLength: 10,
-    stringArray: true,
-    stringArrayEncoding: ['base64'],
-    stringArrayThreshold: 0.75,
-    transformObjectKeys: true,
+    rotateStringArray: false,
+    selfDefending: false,
+    splitStrings: false,
+    splitStringsChunkLength: 5,
+    stringArray: false,
+    stringArrayEncoding: [],
+    stringArrayThreshold: 0,
+    transformObjectKeys: false,
     unicodeEscapeSequence: false
   };
 
@@ -36,6 +36,10 @@ export default function obfuscatorPlugin(options = {}) {
     enforce: 'post',
     
     generateBundle(_, bundle) {
+      // Temporarily disabled obfuscation for faster builds
+      // You can re-enable this later if needed
+      return;
+      
       for (const fileName in bundle) {
         if (fileName.endsWith('.js')) {
           const asset = bundle[fileName];
